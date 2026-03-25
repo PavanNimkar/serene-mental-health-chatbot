@@ -1,0 +1,20 @@
+Django==5.0.6
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.4.0
+django-filter==24.2
+django-redis==5.4.0
+psycopg2-binary==2.9.9
+celery==5.4.0
+redis==5.0.8
+
+# MedGemma
+transformers==4.45.0
+torch==2.4.0
+accelerate==0.34.0
+sentencepiece==0.2.0
+huggingface-hub==0.25.0
+
+# Dev
+python-dotenv==1.0.1
+gunicorn==23.0.0

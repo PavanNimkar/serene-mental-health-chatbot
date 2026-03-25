@@ -1,1 +1,6 @@
 frontend/node_modules/
+files/
+serene-venv/
+Guide.md
+backend/backend/.env
+frontend/.env
