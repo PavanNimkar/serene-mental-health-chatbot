@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 import { chat as chatApi } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 
@@ -94,10 +95,26 @@ export default function Chat() {
   };
 
   const suggestions = [
-    { icon: "🧘", title: "Breathing Exercise", desc: "Guide me through a calming 4-7-8 breathing session." },
-    { icon: "💬", title: "Talk It Out", desc: "I need someone to listen without judgment." },
-    { icon: "📓", title: "Mood Journal", desc: "Help me reflect and log how I'm feeling today." },
-    { icon: "🔬", title: "CBT Technique", desc: "Walk me through a cognitive reframing exercise." },
+    {
+      icon: "🧘",
+      title: "Breathing Exercise",
+      desc: "Guide me through a calming 4-7-8 breathing session.",
+    },
+    {
+      icon: "💬",
+      title: "Talk It Out",
+      desc: "I need someone to listen without judgment.",
+    },
+    {
+      icon: "📓",
+      title: "Mood Journal",
+      desc: "Help me reflect and log how I'm feeling today.",
+    },
+    {
+      icon: "🔬",
+      title: "CBT Technique",
+      desc: "Walk me through a cognitive reframing exercise.",
+    },
   ];
 
   const quickChips = [
@@ -109,7 +126,10 @@ export default function Chat() {
   ];
 
   const fmtTime = (iso) =>
-    new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    new Date(iso).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   return (
     <>
@@ -233,6 +253,23 @@ export default function Chat() {
         .bubble.user { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; border-top-right-radius: 4px; }
         .msg-time { font-size: 10px; color: var(--faint); margin-top: 4px; padding: 0 4px; }
 
+        /* ── Markdown styles inside assistant bubble ── */
+        .bubble.assistant p { margin: 0 0 8px; }
+        .bubble.assistant p:last-child { margin-bottom: 0; }
+        .bubble.assistant strong { font-weight: 700; color: var(--text); }
+        .bubble.assistant em { font-style: italic; }
+        .bubble.assistant ul, .bubble.assistant ol { padding-left: 18px; margin: 6px 0 8px; }
+        .bubble.assistant li { margin-bottom: 4px; }
+        .bubble.assistant h1, .bubble.assistant h2, .bubble.assistant h3 {
+          font-family: 'Lora', serif; font-weight: 600; margin: 10px 0 6px; color: var(--teal-deeper);
+        }
+        .bubble.assistant h1 { font-size: 16px; }
+        .bubble.assistant h2 { font-size: 15px; }
+        .bubble.assistant h3 { font-size: 14px; }
+        .bubble.assistant hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+        .bubble.assistant code { background: var(--teal-soft); border-radius: 4px; padding: 1px 5px; font-size: 12px; font-family: monospace; }
+        .bubble.assistant blockquote { border-left: 3px solid var(--teal-mid); padding-left: 10px; color: var(--muted); margin: 6px 0; }
+
         .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: bounce 1.2s infinite; }
         .typing-dot:nth-child(2) { animation-delay: .2s; }
         .typing-dot:nth-child(3) { animation-delay: .4s; }
@@ -268,7 +305,10 @@ export default function Chat() {
                 <img src="logo.png" alt="serene" className="w-8" />
                 <span className="sb-title">Serene</span>
               </div>
-              <button className="sb-collapse" onClick={() => setSidebarOpen(false)}>
+              <button
+                className="sb-collapse"
+                onClick={() => setSidebarOpen(false)}
+              >
                 <span className="material-icons-round">chevron_left</span>
               </button>
             </div>
@@ -290,18 +330,34 @@ export default function Chat() {
             >
               <span className="material-icons-round">home</span> Home
             </button>
-            <a href="/dashboard" className="nav-item" style={{ textDecoration: "none" }}>
+            <a
+              href="/dashboard"
+              className="nav-item"
+              style={{ textDecoration: "none" }}
+            >
               <span className="material-icons-round">dashboard</span> Dashboard
             </a>
           </div>
 
           <div className="sb-body">
             {loadingConvs ? (
-              <p style={{ padding: "12px", fontSize: "12px", color: "var(--faint)" }}>
+              <p
+                style={{
+                  padding: "12px",
+                  fontSize: "12px",
+                  color: "var(--faint)",
+                }}
+              >
                 Loading…
               </p>
             ) : conversations.length === 0 ? (
-              <p style={{ padding: "12px", fontSize: "12px", color: "var(--faint)" }}>
+              <p
+                style={{
+                  padding: "12px",
+                  fontSize: "12px",
+                  color: "var(--faint)",
+                }}
+              >
                 No conversations yet.
               </p>
             ) : (
@@ -330,7 +386,10 @@ export default function Chat() {
                 justifyContent: "center",
               }}
             >
-              <span className="material-icons-round" style={{ color: "white", fontSize: "18px" }}>
+              <span
+                className="material-icons-round"
+                style={{ color: "white", fontSize: "18px" }}
+              >
                 person
               </span>
             </div>
@@ -357,7 +416,9 @@ export default function Chat() {
               <div className="topbar-logo-pill">
                 <img src="logo.png" alt="serene" className="w-5" />
                 <span className="tl-name">Serene</span>
-                <span className="material-icons-round tl-caret">expand_more</span>
+                <span className="material-icons-round tl-caret">
+                  expand_more
+                </span>
               </div>
             </div>
             <div className="topbar-right">
@@ -400,7 +461,10 @@ export default function Chat() {
                 <div className="hi-bottom">
                   <div className="hi-bottom-left">
                     <button className="hi-action">
-                      <span className="material-icons-round" style={{ color: "var(--faint)" }}>
+                      <span
+                        className="material-icons-round"
+                        style={{ color: "var(--faint)" }}
+                      >
                         attach_file
                       </span>
                       Attach
@@ -451,12 +515,26 @@ export default function Chat() {
                   >
                     {msg.role !== "user" && (
                       <div style={{ width: 36, flexShrink: 0, paddingTop: 2 }}>
-                        <img src="logo.png" alt="serene" style={{ width: 22 }} />
+                        <img
+                          src="logo.png"
+                          alt="serene"
+                          style={{ width: 22 }}
+                        />
                       </div>
                     )}
                     <div className="msg-col">
-                      <div className={`bubble ${msg.role}`}>{msg.content}</div>
-                      <span className="msg-time">{fmtTime(msg.created_at)}</span>
+                      <div className={`bubble ${msg.role}`}>
+                        {msg.role === "assistant" ? (
+                          // ✅ Render markdown for AI messages
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        ) : (
+                          // Plain text for user messages
+                          msg.content
+                        )}
+                      </div>
+                      <span className="msg-time">
+                        {fmtTime(msg.created_at)}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -469,7 +547,12 @@ export default function Chat() {
                     <div className="msg-col">
                       <div
                         className="bubble assistant"
-                        style={{ display: "flex", gap: 5, alignItems: "center", padding: "14px 18px" }}
+                        style={{
+                          display: "flex",
+                          gap: 5,
+                          alignItems: "center",
+                          padding: "14px 18px",
+                        }}
                       >
                         <div className="typing-dot" />
                         <div className="typing-dot" />
@@ -485,7 +568,11 @@ export default function Chat() {
               <div className="chat-input-area">
                 <div className="quick-chips">
                   {quickChips.map((p) => (
-                    <button key={p} className="qchip" onClick={() => handleSend(p)}>
+                    <button
+                      key={p}
+                      className="qchip"
+                      onClick={() => handleSend(p)}
+                    >
                       {p}
                     </button>
                   ))}
@@ -521,7 +608,8 @@ export default function Chat() {
                   </div>
                 </div>
                 <div className="chat-footer">
-                  Serene AI can make mistakes. If you're in crisis, call iCall: 9152987821
+                  Serene AI can make mistakes. If you're in crisis, call iCall:
+                  9152987821
                 </div>
               </div>
             </div>

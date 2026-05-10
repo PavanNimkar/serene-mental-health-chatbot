@@ -1,0 +1,54 @@
+ERROR 2026-05-10 06:50:40,975 medgemma_service Failed to load MedGemma: [WinError 126] The specified module could not be found. Error loading "D:\Serene website\serene-venv\Lib\site-packages\torch\lib\fbgemm.dll" or one of its dependencies.
+ERROR 2026-05-10 06:55:21,710 medgemma_service MedGemma API generation error: Expecting value: line 1 column 1 (char 0)
+ERROR 2026-05-10 07:00:47,826 medgemma_service HF API HTTP Error 404: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /models/google/gemma-2b-it</pre>
+</body>
+</html>
+
+ERROR 2026-05-10 07:03:36,977 medgemma_service HF API HTTP Error 404: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /models/google/gemma-2b-it</pre>
+</body>
+</html>
+
+ERROR 2026-05-10 07:06:54,582 medgemma_service MedGemma API generation error: name 'prompt' is not defined
+ERROR 2026-05-10 07:08:23,614 medgemma_service MedGemma API generation error: name 'prompt' is not defined
+ERROR 2026-05-10 07:10:40,041 medgemma_service MedGemma API generation error: name 'prompt' is not defined
+ERROR 2026-05-10 07:12:03,667 medgemma_service HF API HTTP Error 404: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /models/google/gemma-2b-it</pre>
+</body>
+</html>
+
+ERROR 2026-05-10 07:17:30,987 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 07:22:24,305 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 07:23:49,785 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 07:26:31,664 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 07:28:53,065 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 08:31:28,228 medgemma_service HF API HTTP Error 400: {"error":"Model not supported by provider hf-inference"}
+ERROR 2026-05-10 08:39:36,160 model_service HF API HTTP 400: {"error":"Model not supported by provider novita"}
+ERROR 2026-05-10 08:41:54,101 model_service HF API HTTP 400: {"error":"Model not supported by provider deepinfra"}
+ERROR 2026-05-10 08:44:30,458 model_service HF API HTTP 400: {"error":{"message":"The requested model 'google/gemma-3-4b-it' is not supported by provider 'deepinfra'.","type":"invalid_request_error","param":"model","code":"model_not_supported"}}
+ERROR 2026-05-10 08:46:24,839 model_service HF API generation error: InferenceClient.__init__() got an unexpected keyword argument 'provider'
+ERROR 2026-05-10 08:50:03,771 model_service HF API generation error: (Request ID: Root=1-69fff950-3f10a1281dc56fe90a51fc42;9ed18f68-1ed3-4496-aae3-06b4364c0618)
+
+Bad request:
+{'message': "The requested model 'google/gemma-3-4b-it' is not supported by any provider you have enabled.", 'type': 'invalid_request_error', 'param': 'model', 'code': 'model_not_supported'}
+INFO 2026-05-10 09:00:18,381 model_service HF response ok | model=google/gemma-4-31B-it:deepinfra
+INFO 2026-05-10 09:14:18,265 model_service HF response ok | model=google/gemma-4-31B-it:deepinfra

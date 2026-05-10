@@ -11,7 +11,7 @@ from .serializers import (
     ConversationListSerializer,
     SendMessageSerializer,
 )
-from .medgemma_service import generate_response
+from .model_service import generate_response
 
 logger = logging.getLogger("apps.chat")
 
