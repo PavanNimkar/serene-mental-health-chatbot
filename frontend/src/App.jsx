@@ -9,6 +9,10 @@ import Step1 from "./pages/Onboarding/Step1";
 import Step2 from "./pages/Onboarding/Step2";
 import Step3 from "./pages/Onboarding/Step3";
 import Step4 from "./pages/Onboarding/Step4";
+import Helplines from "./pages/FindHelp/Helplines";
+import FindTherapist from "./pages/FindHelp/FindTherapist";
+import SelfHelpTechniques from "./pages/FindHelp/SelfHelpTechniques";
+import { FindHelpProvider } from "./context/FindHelpContext";
 
 /** Redirect unauthenticated users to /login */
 function ProtectedRoute({ children }) {
@@ -17,7 +21,7 @@ function ProtectedRoute({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
         <div className="flex flex-col items-center gap-3">
-          <img src="logo.png" alt="serene" className="w-12 animate-pulse" />
+          <img src="/logo.png" alt="serene" className="w-12 animate-pulse" />
           <p className="text-sm text-[#9AA5B1] font-medium">Loading…</p>
         </div>
       </div>
@@ -98,7 +102,13 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      {/* Find Help Routes */}
 
+      <Route path="/find-help/helplines" element={<Helplines />} />
+      <Route path="/find-help/therapist" element={<FindTherapist />} />
+      <Route path="/find-help/self-help" element={<SelfHelpTechniques />} />
+
+      {/* Navbar */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -108,7 +118,9 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppRoutes />
+        <FindHelpProvider>
+          <AppRoutes />
+        </FindHelpProvider>
       </BrowserRouter>
     </AuthProvider>
   );

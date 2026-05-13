@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { chat as chatApi } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 export default function Chat() {
   const { user, logout } = useAuth();
@@ -217,9 +218,9 @@ export default function Chat() {
         .home-subtitle { font-size: 26px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 34px; }
 
         .home-input-wrap { width: 100%; max-width: 680px; background: var(--white); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,.07); overflow: hidden; }
-        .hi-textarea-row { padding: 10px 16px; }
-        .hi-textarea { width: 100%; background: none; border: none; outline: none; font-family: 'Nunito', sans-serif; font-size: 15px; color: var(--text); resize: none; min-height: 56px; max-height: 140px; line-height: 1.55; }
-        .hi-textarea::placeholder { color: var(--faint); }
+        .hi-textarea-row { padding: 10px 16px;}
+        .hi-textarea { width: 100%; background: none; border: none; outline: none; font-family: 'Nunito', sans-serif; font-size: 15px; color: var(--text); resize: none; min-height: 100px; max-height: 200px; line-height: 1.55; }
+        .hi-textarea::placeholder { color: var(--faint);}
         .hi-bottom { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 12px; border-top: 1px solid var(--border); }
         .hi-bottom-left { display: flex; align-items: center; gap: 2px; }
         .hi-action { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 5px 8px; border-radius: 8px; transition: background .15s; border: none; background: none; font-family: 'Nunito', sans-serif; }
@@ -301,10 +302,12 @@ export default function Chat() {
         <aside className={`sidebar${sidebarOpen ? "" : " hidden"}`}>
           <div className="sb-top">
             <div className="sb-brand">
-              <div className="sb-brand-left">
-                <img src="logo.png" alt="serene" className="w-8" />
-                <span className="sb-title">Serene</span>
-              </div>
+              <Link to="/" className="flex items-center gap-2.5">
+                <img src="logo.png" alt="serene" className="w-10" />
+                <span className="text-2xl font-serif font-bold text-[#1F2933]">
+                  Serene
+                </span>
+              </Link>
               <button
                 className="sb-collapse"
                 onClick={() => setSidebarOpen(false)}
@@ -413,23 +416,6 @@ export default function Chat() {
                   <span className="material-icons-round">menu</span>
                 </button>
               )}
-              <div className="topbar-logo-pill">
-                <img src="logo.png" alt="serene" className="w-5" />
-                <span className="tl-name">Serene</span>
-                <span className="material-icons-round tl-caret">
-                  expand_more
-                </span>
-              </div>
-            </div>
-            <div className="topbar-right">
-              <button className="tb-btn">
-                <span className="material-icons-round">more_horiz</span>
-              </button>
-              <button className="tb-btn outline">
-                <span className="material-icons-round">ios_share</span>
-                Export
-              </button>
-              <button className="upgrade-btn">Upgrade</button>
             </div>
           </div>
 
