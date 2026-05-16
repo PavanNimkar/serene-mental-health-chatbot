@@ -2,12 +2,100 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { chat as chatApi } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const SUGGESTIONS = [
+  {
+    icon: "🧘",
+    title: "Breathing Exercise",
+    prompt: "Guide me through a calming 4-7-8 breathing session.",
+  },
+  {
+    icon: "💬",
+    title: "Talk It Out",
+    prompt: "I need someone to listen without judgment.",
+  },
+  {
+    icon: "📓",
+    title: "Mood Journal",
+    prompt: "Help me reflect and log how I'm feeling today.",
+  },
+  {
+    icon: "🔬",
+    title: "CBT Technique",
+    prompt: "Walk me through a cognitive reframing exercise.",
+  },
+];
+
+const QUICK_CHIPS = [
+  "Try a breathing exercise",
+  "I need to talk",
+  "Log my mood",
+  "CBT exercise",
+  "Feeling anxious",
+];
+
+const fmtTime = (iso) =>
+  new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+function TypingDots() {
+  return (
+    <div className="flex gap-[5px] items-center px-4 py-3">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="w-[7px] h-[7px] rounded-full bg-[#22B1D4]"
+          style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Bubble({ msg }) {
+  const isUser = msg.role === "user";
+  return (
+    <div
+      className={`flex gap-[10px] max-w-[660px] ${isUser ? "ml-auto flex-row-reverse" : ""}`}
+    >
+      {!isUser && (
+        <div className="w-9 h-9 rounded-full bg-[#E8F8FC] flex items-center justify-center shrink-0 mt-0.5 border border-[#D4EEF7]">
+          <img
+            src="/logo.png"
+            alt="Serene"
+            className="w-5 h-5 object-contain"
+          />
+        </div>
+      )}
+      <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+        <div
+          className={`px-4 py-[11px] rounded-[18px] text-[14px] leading-[1.6] shadow-sm max-w-[480px] ${
+            isUser
+              ? "bg-gradient-to-br from-[#22B1D4] to-[#189AB4] text-white rounded-tr-[4px]"
+              : "bg-white border border-[#E4EEF3] text-[#1F2933] rounded-tl-[4px]"
+          }`}
+        >
+          {isUser ? (
+            <span>{msg.content}</span>
+          ) : (
+            <div className="prose prose-sm max-w-none [&_p]:my-1 [&_p:last-child]:mb-0 [&_strong]:font-bold [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:mb-1 [&_code]:bg-[#E8F8FC] [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_blockquote]:border-l-2 [&_blockquote]:border-[#D4EEF7] [&_blockquote]:pl-2 [&_blockquote]:text-[#52606D]">
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            </div>
+          )}
+        </div>
+        <span className="text-[10px] text-[#9AA5B1] mt-1 px-1">
+          {fmtTime(msg.created_at || new Date().toISOString())}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function Chat() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [view, setView] = useState("home");
   const [message, setMessage] = useState("");
-  const [activeView, setActiveView] = useState("home");
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [activeConvId, setActiveConvId] = useState(null);
@@ -16,36 +104,34 @@ export default function Chat() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const messagesEndRef = useRef(null);
 
-  const displayName = user?.display_name || user?.username || "there";
+  const displayName = user?.first_name || user?.username || "there";
 
-  // Load conversations on mount
   useEffect(() => {
     chatApi
       .list()
-      .then((data) => setConversations(data.results || data))
+      .then((d) => setConversations(Array.isArray(d) ? d : (d?.results ?? [])))
       .catch(console.error)
       .finally(() => setLoadingConvs(false));
   }, []);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
 
   const loadConversation = async (id) => {
     try {
       const data = await chatApi.detail(id);
       setMessages(data.messages || []);
       setActiveConvId(id);
-      setActiveView("chat");
+      setView("chat");
     } catch (e) {
       console.error(e);
     }
   };
 
   const handleSend = async (text) => {
-    const msg = text || message;
-    if (!msg.trim() || loading) return;
+    const msg = (text || message).trim();
+    if (!msg || loading) return;
 
     const userMsg = {
       id: `tmp-${Date.now()}`,
@@ -56,7 +142,7 @@ export default function Chat() {
 
     setMessages((prev) => [...prev, userMsg]);
     setMessage("");
-    setActiveView("chat");
+    setView("chat");
     setLoading(true);
 
     try {
@@ -65,15 +151,30 @@ export default function Chat() {
         conversation_id: activeConvId || null,
       });
 
-      // Set conversation id if new
       if (!activeConvId) {
         setActiveConvId(data.conversation_id);
-        // Refresh sidebar list
-        chatApi.list().then((d) => setConversations(d.results || d));
+        chatApi
+          .list()
+          .then((d) =>
+            setConversations(Array.isArray(d) ? d : (d?.results ?? [])),
+          );
       }
 
-      setMessages((prev) => [...prev, data.message]);
-    } catch (e) {
+      const aiContent =
+        data.message && typeof data.message === "object"
+          ? data.message.content
+          : data.reply || data.message || "";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          role: "assistant",
+          content: aiContent,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
@@ -90,287 +191,133 @@ export default function Chat() {
   };
 
   const startNewChat = () => {
-    setActiveView("home");
+    setView("home");
     setMessages([]);
     setActiveConvId(null);
   };
 
-  const suggestions = [
-    {
-      icon: "🧘",
-      title: "Breathing Exercise",
-      desc: "Guide me through a calming 4-7-8 breathing session.",
-    },
-    {
-      icon: "💬",
-      title: "Talk It Out",
-      desc: "I need someone to listen without judgment.",
-    },
-    {
-      icon: "📓",
-      title: "Mood Journal",
-      desc: "Help me reflect and log how I'm feeling today.",
-    },
-    {
-      icon: "🔬",
-      title: "CBT Technique",
-      desc: "Walk me through a cognitive reframing exercise.",
-    },
-  ];
-
-  const quickChips = [
-    "Try a breathing exercise",
-    "I need to talk",
-    "Log my mood",
-    "CBT exercise",
-    "Feeling anxious",
-  ];
-
-  const fmtTime = (iso) =>
-    new Date(iso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-          --teal: #22B1D4; --teal-dark: #189AB4; --teal-deeper: #137A8F;
-          --teal-soft: #E8F8FC; --teal-mid: #D4EEF7;
-          --bg: #F8FAFC; --white: #ffffff; --border: #E4EEF3;
-          --text: #1F2933; --muted: #52606D; --faint: #9AA5B1;
-          --sidebar-w: 268px;
-        }
-
-        .app { display: flex; height: 100vh; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-
-        .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: width .28s ease, min-width .28s ease; overflow: hidden; }
-        .sidebar.hidden { width: 0; min-width: 0; }
-
-        .sb-top { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
-        .sb-brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .sb-brand-left { display: flex; align-items: center; gap: 10px; }
-        .sb-title { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; color: var(--text); }
-        .sb-collapse { width: 28px; height: 28px; border-radius: 7px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--faint); transition: all .15s; }
-        .sb-collapse:hover { background: var(--teal-soft); color: var(--teal); }
-        .sb-collapse .material-icons-round { font-size: 20px; }
-
-        .new-btn { width: 100%; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; border: none; border-radius: 10px; padding: 9px 14px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 12px rgba(34,177,212,.3); transition: opacity .15s; }
-        .new-btn:hover { opacity: .9; }
-        .new-btn .material-icons-round { font-size: 17px; }
-
-        .sb-search { margin: 12px 16px 0; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; }
-        .sb-search .material-icons-round { font-size: 16px; color: var(--faint); }
-        .sb-search input { flex: 1; background: none; border: none; outline: none; font-family: 'Nunito', sans-serif; font-size: 13px; color: var(--text); }
-        .sb-search input::placeholder { color: var(--faint); }
-
-        .sb-nav { padding: 10px 10px 4px; }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s; border: none; background: none; width: 100%; font-family: 'Nunito', sans-serif; }
-        .nav-item:hover { background: var(--teal-soft); color: var(--teal); }
-        .nav-item.active { background: var(--teal-soft); color: var(--teal); }
-        .nav-item .material-icons-round { font-size: 18px; }
-
-        .sb-body { flex: 1; overflow-y: auto; padding: 4px 10px 8px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-        .hist-label { font-size: 10px; font-weight: 800; color: var(--faint); text-transform: uppercase; letter-spacing: .8px; padding: 10px 6px 4px; }
-        .hist-item { display: block; width: 100%; text-align: left; border: none; background: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-family: 'Nunito', sans-serif; font-size: 12.5px; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all .15s; }
-        .hist-item:hover { background: var(--teal-soft); color: var(--teal); }
-        .hist-item.active { background: var(--teal-soft); color: var(--teal); font-weight: 700; }
-
-        .sb-profile { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background .15s; }
-        .sb-profile:hover { background: var(--bg); }
-        .sb-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; }
-        .sb-profile-info { flex: 1; min-width: 0; }
-        .sb-profile-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
-        .sb-profile-email { font-size: 11px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sb-logout { color: var(--faint); background: none; border: none; cursor: pointer; display: flex; align-items: center; }
-        .sb-logout:hover { color: var(--teal); }
-        .sb-logout .material-icons-round { font-size: 18px; }
-
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        .topbar { height: 56px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
-        .topbar-left { display: flex; align-items: center; gap: 10px; }
-        .topbar-logo-pill { display: flex; align-items: center; gap: 7px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 8px; }
-        .tl-name { font-size: 13px; font-weight: 700; color: var(--text); }
-        .tl-caret { font-size: 16px; color: var(--faint); }
-        .topbar-right { display: flex; align-items: center; gap: 6px; }
-        .tb-btn { height: 34px; border: none; background: none; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--faint); transition: all .15s; padding: 0 8px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; gap: 5px; }
-        .tb-btn .material-icons-round { font-size: 18px; }
-        .tb-btn:hover { background: var(--teal-soft); color: var(--teal); }
-        .tb-btn.outline { border: 1px solid var(--border); }
-        .upgrade-btn { height: 34px; padding: 0 16px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; border: none; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 10px rgba(34,177,212,.3); transition: opacity .15s; }
-        .upgrade-btn:hover { opacity: .9; }
-
-        .home-view { flex: 1; display: flex; flex-direction: column; align-items: center; overflow-y: auto; padding: 40px 24px 0; }
-
-        .orb-wrap { position: relative; width: 110px; height: 110px; margin-bottom: 18px; }
-        .orb { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle at 38% 35%, rgba(34,177,212,.6) 0%, rgba(34,177,212,.28) 40%, rgba(34,177,212,.08) 70%, transparent 100%); box-shadow: 0 0 60px rgba(34,177,212,.22), inset 0 0 30px rgba(255,255,255,.25); animation: orb-pulse 4s ease-in-out infinite; position: relative; }
-        .orb::after { content: ''; position: absolute; top: 14%; left: 18%; width: 38%; height: 26%; background: rgba(255,255,255,.5); border-radius: 50%; filter: blur(7px); }
-        @keyframes orb-pulse { 0%, 100% { transform: scale(1); opacity: .88; } 50% { transform: scale(1.07); opacity: 1; } }
-
-        .home-greeting { font-family: 'Lora', serif; font-size: 28px; font-weight: 400; font-style: italic; color: var(--teal); margin-bottom: 5px; text-align: center; }
-        .home-subtitle { font-size: 26px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 34px; }
-
-        .home-input-wrap { width: 100%; max-width: 680px; background: var(--white); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 4px 28px rgba(0,0,0,.07); overflow: hidden; }
-        .hi-textarea-row { padding: 10px 16px;}
-        .hi-textarea { width: 100%; background: none; border: none; outline: none; font-family: 'Nunito', sans-serif; font-size: 15px; color: var(--text); resize: none; min-height: 100px; max-height: 200px; line-height: 1.55; }
-        .hi-textarea::placeholder { color: var(--faint);}
-        .hi-bottom { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 12px; border-top: 1px solid var(--border); }
-        .hi-bottom-left { display: flex; align-items: center; gap: 2px; }
-        .hi-action { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 5px 8px; border-radius: 8px; transition: background .15s; border: none; background: none; font-family: 'Nunito', sans-serif; }
-        .hi-action:hover { background: var(--teal-soft); color: var(--teal); }
-        .hi-action .material-icons-round { font-size: 15px; color: var(--teal); }
-        .send-home { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: all .2s; }
-        .send-home.active { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; box-shadow: 0 4px 12px rgba(34,177,212,.4); }
-        .send-home.inactive { background: var(--bg); color: var(--faint); cursor: not-allowed; }
-        .send-home .material-icons-round { font-size: 18px; }
-
-        .suggestions { width: 100%; max-width: 680px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; padding-bottom: 16px; }
-        .sug-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 16px 14px; cursor: pointer; transition: all .2s; text-align: left; }
-        .sug-card:hover { border-color: var(--teal-mid); box-shadow: 0 4px 16px rgba(34,177,212,.12); transform: translateY(-2px); }
-        .sug-icon { font-size: 22px; margin-bottom: 8px; }
-        .sug-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-        .sug-desc { font-size: 11px; color: var(--faint); line-height: 1.5; }
-
-        .home-footer { width: 100%; max-width: 680px; text-align: center; padding: 10px 0 20px; font-size: 11px; color: var(--faint); }
-
-        .chat-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .messages-area { flex: 1; overflow-y: auto; padding: 28px 24px 16px; display: flex; flex-direction: column; gap: 18px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-        .date-divider { text-align: center; }
-        .date-pill { display: inline-block; background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 3px 14px; font-size: 11px; color: var(--faint); font-weight: 600; }
-
-        .msg-row { display: flex; gap: 10px; max-width: 660px; }
-        .msg-row.user { margin-left: auto; flex-direction: row-reverse; }
-        .msg-col { display: flex; flex-direction: column; }
-        .msg-row.user .msg-col { align-items: flex-end; }
-        .bubble { padding: 11px 16px; border-radius: 18px; font-size: 14px; line-height: 1.6; box-shadow: 0 1px 4px rgba(0,0,0,.06); max-width: 480px; }
-        .bubble.assistant { background: var(--white); border: 1px solid var(--border); color: var(--text); border-top-left-radius: 4px; }
-        .bubble.user { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; border-top-right-radius: 4px; }
-        .msg-time { font-size: 10px; color: var(--faint); margin-top: 4px; padding: 0 4px; }
-
-        /* ── Markdown styles inside assistant bubble ── */
-        .bubble.assistant p { margin: 0 0 8px; }
-        .bubble.assistant p:last-child { margin-bottom: 0; }
-        .bubble.assistant strong { font-weight: 700; color: var(--text); }
-        .bubble.assistant em { font-style: italic; }
-        .bubble.assistant ul, .bubble.assistant ol { padding-left: 18px; margin: 6px 0 8px; }
-        .bubble.assistant li { margin-bottom: 4px; }
-        .bubble.assistant h1, .bubble.assistant h2, .bubble.assistant h3 {
-          font-family: 'Lora', serif; font-weight: 600; margin: 10px 0 6px; color: var(--teal-deeper);
-        }
-        .bubble.assistant h1 { font-size: 16px; }
-        .bubble.assistant h2 { font-size: 15px; }
-        .bubble.assistant h3 { font-size: 14px; }
-        .bubble.assistant hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
-        .bubble.assistant code { background: var(--teal-soft); border-radius: 4px; padding: 1px 5px; font-size: 12px; font-family: monospace; }
-        .bubble.assistant blockquote { border-left: 3px solid var(--teal-mid); padding-left: 10px; color: var(--muted); margin: 6px 0; }
-
-        .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: bounce 1.2s infinite; }
-        .typing-dot:nth-child(2) { animation-delay: .2s; }
-        .typing-dot:nth-child(3) { animation-delay: .4s; }
-        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-
-        .chat-input-area { padding: 10px 20px 16px; background: var(--white); border-top: 1px solid var(--border); }
-        .quick-chips { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
-        .quick-chips::-webkit-scrollbar { display: none; }
-        .qchip { flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--teal); border: 1.5px solid rgba(34,177,212,.3); background: var(--white); padding: 5px 13px; border-radius: 20px; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .15s; white-space: nowrap; }
-        .qchip:hover { background: var(--teal-soft); border-color: var(--teal); }
-
-        .chat-input-inner { background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; display: flex; align-items: flex-end; transition: border-color .2s, box-shadow .2s; overflow: hidden; }
-        .chat-input-inner:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(34,177,212,.1); }
-        .chat-textarea { flex: 1; background: none; border: none; outline: none; padding: 13px 12px; resize: none; font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text); min-height: 48px; max-height: 120px; line-height: 1.5; }
-        .chat-textarea::placeholder { color: var(--faint); }
-        .chat-side-btns { display: flex; align-items: center; padding: 8px 10px 8px 0; gap: 2px; }
-        .cs-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--faint); transition: all .15s; }
-        .cs-btn:hover { background: var(--teal-soft); color: var(--teal); }
-        .cs-btn .material-icons-round { font-size: 18px; }
-        .send-chat { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-        .send-chat.active { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; box-shadow: 0 3px 12px rgba(34,177,212,.4); }
-        .send-chat.inactive { background: var(--border); color: var(--faint); cursor: not-allowed; }
-        .send-chat .material-icons-round { font-size: 18px; }
-        .chat-footer { text-align: center; margin-top: 8px; font-size: 10px; color: #B8C4CE; }
+        @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+        @keyframes orb-pulse { 0%,100%{transform:scale(1);opacity:.88} 50%{transform:scale(1.07);opacity:1} }
+        .orb-anim { animation: orb-pulse 4s ease-in-out infinite; }
+        .sb-scroll::-webkit-scrollbar { width: 4px; }
+        .sb-scroll::-webkit-scrollbar-thumb { background: #E4EEF3; border-radius: 4px; }
+        .msg-scroll::-webkit-scrollbar { width: 4px; }
+        .msg-scroll::-webkit-scrollbar-thumb { background: #E4EEF3; border-radius: 4px; }
+        .no-sb::-webkit-scrollbar { display: none; }
       `}</style>
 
-      <div className="app">
-        {/* SIDEBAR */}
-        <aside className={`sidebar${sidebarOpen ? "" : " hidden"}`}>
-          <div className="sb-top">
-            <div className="sb-brand">
-              <Link to="/" className="flex items-center gap-2.5">
-                <img src="logo.png" alt="serene" className="w-10" />
-                <span className="text-2xl font-serif font-bold text-[#1F2933]">
+      <div
+        className="flex h-screen bg-[#F8FAFC] overflow-hidden text-[#1F2933]"
+        style={{ fontFamily: "'Nunito', 'DM Sans', sans-serif" }}
+      >
+        {/* ── SIDEBAR ── */}
+        <aside
+          className={`flex flex-col bg-white border-r border-[#E4EEF3] shrink-0 transition-all duration-300 overflow-hidden ${
+            sidebarOpen ? "w-[268px] min-w-[268px]" : "w-0 min-w-0"
+          }`}
+        >
+          {/* Brand + New Chat */}
+          <div className="p-4 pb-3 border-b border-[#E4EEF3]">
+            <div className="flex items-center justify-between mb-3">
+              <Link to="/" className="flex items-center gap-2.5 no-underline">
+                <img
+                  src="/logo.png"
+                  alt="Serene"
+                  className="w-8 h-8 object-contain"
+                />
+                <span
+                  className="text-[18px] font-bold text-[#1F2933]"
+                  style={{ fontFamily: "serif" }}
+                >
                   Serene
                 </span>
               </Link>
               <button
-                className="sb-collapse"
                 onClick={() => setSidebarOpen(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#9AA5B1] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors"
               >
-                <span className="material-icons-round">chevron_left</span>
+                <span className="material-symbols-outlined text-[20px]">
+                  chevron_left
+                </span>
               </button>
             </div>
-            <button className="new-btn" onClick={startNewChat}>
-              <span className="material-icons-round">add</span>
+            <button
+              onClick={startNewChat}
+              className="w-full flex items-center justify-center gap-1.5 py-[9px] rounded-[10px] text-white text-[13px] font-bold shadow-[0_3px_12px_rgba(34,177,212,.3)] hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
+            >
+              <span className="material-symbols-outlined text-[17px]">add</span>
               New chat
             </button>
           </div>
 
-          <div className="sb-search">
-            <span className="material-icons-round">search</span>
-            <input placeholder="Search conversations…" />
+          {/* Search */}
+          <div className="mx-4 mt-3 flex items-center gap-2 bg-[#F8FAFC] border border-[#E4EEF3] rounded-[9px] px-3 py-[7px]">
+            <span className="material-symbols-outlined text-[16px] text-[#9AA5B1]">
+              search
+            </span>
+            <input
+              placeholder="Search conversations…"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] text-[#1F2933] placeholder:text-[#9AA5B1]"
+            />
           </div>
 
-          <div className="sb-nav">
+          {/* Nav items */}
+          <div className="px-[10px] pt-2 pb-1">
             <button
-              className={`nav-item${activeView === "home" ? " active" : ""}`}
               onClick={startNewChat}
+              className={`flex items-center gap-2.5 w-full px-[10px] py-2 rounded-[9px] text-[13px] font-semibold transition-colors ${
+                view === "home"
+                  ? "bg-[#E8F8FC] text-[#22B1D4]"
+                  : "text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4]"
+              }`}
             >
-              <span className="material-icons-round">home</span> Home
+              <span className="material-symbols-outlined text-[18px]">
+                home
+              </span>
+              Home
             </button>
-            <a
-              href="/dashboard"
-              className="nav-item"
-              style={{ textDecoration: "none" }}
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2.5 w-full px-[10px] py-2 rounded-[9px] text-[13px] font-semibold text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors no-underline"
             >
-              <span className="material-icons-round">dashboard</span> Dashboard
-            </a>
+              <span className="material-symbols-outlined text-[18px]">
+                dashboard
+              </span>
+              Dashboard
+            </Link>
           </div>
 
-          <div className="sb-body">
+          {/* History list */}
+          <div className="flex-1 overflow-y-auto px-[10px] pb-2 sb-scroll">
             {loadingConvs ? (
-              <p
-                style={{
-                  padding: "12px",
-                  fontSize: "12px",
-                  color: "var(--faint)",
-                }}
-              >
-                Loading…
-              </p>
+              <p className="text-[12px] text-[#9AA5B1] px-2 pt-3">Loading…</p>
             ) : conversations.length === 0 ? (
-              <p
-                style={{
-                  padding: "12px",
-                  fontSize: "12px",
-                  color: "var(--faint)",
-                }}
-              >
+              <p className="text-[12px] text-[#9AA5B1] px-2 pt-3">
                 No conversations yet.
               </p>
             ) : (
               <>
-                <div className="hist-label">Recent</div>
+                <p className="text-[10px] font-extrabold text-[#9AA5B1] uppercase tracking-[.8px] px-1.5 pt-[10px] pb-1">
+                  Recent
+                </p>
                 {conversations.map((c) => (
                   <button
                     key={c.id}
-                    className={`hist-item${activeConvId === c.id ? " active" : ""}`}
                     onClick={() => loadConversation(c.id)}
+                    className={`w-full text-left px-[10px] py-[6px] rounded-[8px] text-[12.5px] font-medium truncate transition-colors ${
+                      activeConvId === c.id
+                        ? "bg-[#E8F8FC] text-[#22B1D4] font-bold"
+                        : "text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4]"
+                    }`}
                   >
                     {c.title || "Untitled chat"}
                   </button>
@@ -379,62 +326,115 @@ export default function Chat() {
             )}
           </div>
 
-          <div className="sb-profile">
+          {/* Profile + logout */}
+          <div className="flex items-center gap-[9px] px-[14px] py-3 border-t border-[#E4EEF3] hover:bg-[#F8FAFC] transition-colors cursor-default">
             <div
-              className="sb-avatar"
-              style={{
-                background: "linear-gradient(135deg, #E8F8FC, #22B1D4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              className="w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 border-2 border-[#E4EEF3]"
+              style={{ background: "linear-gradient(135deg,#E8F8FC,#22B1D4)" }}
             >
-              <span
-                className="material-icons-round"
-                style={{ color: "white", fontSize: "18px" }}
-              >
+              <span className="material-symbols-outlined text-white text-[18px]">
                 person
               </span>
             </div>
-            <div className="sb-profile-info">
-              <div className="sb-profile-name">{displayName}</div>
-              <div className="sb-profile-email">{user?.email || ""}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12.5px] font-bold text-[#1F2933] truncate">
+                {displayName}
+              </p>
+              <p className="text-[11px] text-[#9AA5B1] truncate">
+                {user?.email || ""}
+              </p>
             </div>
-            <button className="sb-logout" onClick={logout} title="Sign out">
-              <span className="material-icons-round">logout</span>
+            <button
+              onClick={handleLogout}
+              title="Sign out"
+              className="text-[#9AA5B1] hover:text-[#22B1D4] transition-colors border-none bg-transparent"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                logout
+              </span>
             </button>
           </div>
         </aside>
 
-        {/* MAIN */}
-        <div className="main">
+        {/* ── MAIN AREA ── */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Topbar */}
-          <div className="topbar">
-            <div className="topbar-left">
+          <div className="h-14 bg-white border-b border-[#E4EEF3] flex items-center justify-between px-5 shrink-0">
+            <div className="flex items-center gap-2.5">
               {!sidebarOpen && (
-                <button className="tb-btn" onClick={() => setSidebarOpen(true)}>
-                  <span className="material-icons-round">menu</span>
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-[#9AA5B1] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors"
+                >
+                  <span className="material-symbols-outlined">menu</span>
                 </button>
               )}
+              <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E4EEF3] rounded-full px-3 py-[5px]">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg,#22B1D4,#189AB4)",
+                  }}
+                >
+                  <span
+                    className="material-symbols-outlined text-white text-[13px]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    smart_toy
+                  </span>
+                </div>
+                <span className="text-[13px] font-bold text-[#1F2933]">
+                  Serene AI
+                </span>
+                <div className="flex items-center gap-1 ml-1">
+                  <div className="w-[6px] h-[6px] rounded-full bg-[#10B981] animate-pulse" />
+                  <span className="text-[10px] text-[#10B981] font-mono tracking-wider">
+                    ONLINE
+                  </span>
+                </div>
+              </div>
             </div>
+            <button
+              onClick={startNewChat}
+              className="flex items-center gap-1.5 h-[34px] px-3 rounded-[8px] border border-[#E4EEF3] text-[13px] font-semibold text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              New Chat
+            </button>
           </div>
 
-          {/* HOME VIEW */}
-          {activeView === "home" && (
-            <div className="home-view">
-              <div className="orb-wrap">
-                <div className="orb" />
+          {/* ── HOME VIEW ── */}
+          {view === "home" && (
+            <div className="flex-1 flex flex-col items-center overflow-y-auto px-6 pt-10 pb-6">
+              {/* Orb */}
+              <div
+                className="w-[110px] h-[110px] rounded-full mb-5 orb-anim relative"
+                style={{
+                  background:
+                    "radial-gradient(circle at 38% 35%, rgba(34,177,212,.6) 0%, rgba(34,177,212,.28) 40%, rgba(34,177,212,.08) 70%, transparent 100%)",
+                  boxShadow:
+                    "0 0 60px rgba(34,177,212,.22), inset 0 0 30px rgba(255,255,255,.25)",
+                }}
+              >
+                <div className="absolute top-[14%] left-[18%] w-[38%] h-[26%] bg-white/50 rounded-full blur-[7px]" />
               </div>
-              <div className="home-greeting">Hello, {displayName}</div>
-              <div className="home-subtitle">How can I assist you today?</div>
 
-              <div className="home-input-wrap">
-                <div className="hi-textarea-row">
+              <p
+                className="text-[28px] italic text-[#22B1D4] mb-1 font-semibold"
+                style={{ fontFamily: "serif" }}
+              >
+                Hello, {displayName}
+              </p>
+              <p className="text-[26px] font-bold text-[#1F2933] mb-8 text-center">
+                How can I assist you today?
+              </p>
+
+              {/* Input card */}
+              <div className="w-full max-w-[680px] bg-white border border-[#E4EEF3] rounded-[18px] shadow-[0_4px_28px_rgba(0,0,0,.07)] overflow-hidden">
+                <div className="px-4 py-[10px]">
                   <textarea
-                    className="hi-textarea"
-                    placeholder="How are you feeling today?"
                     value={message}
-                    rows={2}
+                    rows={3}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -442,108 +442,89 @@ export default function Chat() {
                         handleSend();
                       }
                     }}
+                    placeholder="How are you feeling today?"
+                    className="w-full bg-transparent border-none outline-none resize-none text-[15px] text-[#1F2933] placeholder:text-[#9AA5B1] leading-[1.55] min-h-[80px] max-h-[180px]"
                   />
                 </div>
-                <div className="hi-bottom">
-                  <div className="hi-bottom-left">
-                    <button className="hi-action">
-                      <span
-                        className="material-icons-round"
-                        style={{ color: "var(--faint)" }}
-                      >
-                        attach_file
-                      </span>
-                      Attach
-                    </button>
-                  </div>
+                <div className="flex items-center justify-between px-4 py-[8px] border-t border-[#E4EEF3]">
+                  <span className="text-[11px] text-[#9AA5B1]">
+                    Shift+Enter for new line
+                  </span>
                   <button
-                    className={`send-home ${message.trim() ? "active" : "inactive"}`}
                     onClick={() => handleSend()}
                     disabled={!message.trim() || loading}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                      message.trim() && !loading
+                        ? "text-white shadow-[0_4px_12px_rgba(34,177,212,.4)]"
+                        : "bg-[#F8FAFC] text-[#9AA5B1] cursor-not-allowed"
+                    }`}
+                    style={
+                      message.trim() && !loading
+                        ? {
+                            background:
+                              "linear-gradient(135deg,#22B1D4,#189AB4)",
+                          }
+                        : {}
+                    }
                   >
-                    <span className="material-icons-round">arrow_upward</span>
+                    <span className="material-symbols-outlined text-[18px]">
+                      arrow_upward
+                    </span>
                   </button>
                 </div>
               </div>
 
-              <div className="suggestions">
-                {suggestions.map((s) => (
+              {/* Suggestion cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-[10px] w-full max-w-[680px] mt-[14px]">
+                {SUGGESTIONS.map((s) => (
                   <button
                     key={s.title}
-                    className="sug-card"
-                    onClick={() => handleSend(s.desc)}
+                    onClick={() => handleSend(s.prompt)}
+                    className="bg-white border border-[#E4EEF3] rounded-2xl p-4 text-left hover:border-[#D4EEF7] hover:shadow-[0_4px_16px_rgba(34,177,212,.12)] hover:-translate-y-0.5 transition-all"
                   >
-                    <div className="sug-icon">{s.icon}</div>
-                    <div className="sug-title">{s.title}</div>
-                    <div className="sug-desc">{s.desc}</div>
+                    <div className="text-[22px] mb-2">{s.icon}</div>
+                    <div className="text-[13px] font-bold text-[#1F2933] mb-1">
+                      {s.title}
+                    </div>
+                    <div className="text-[11px] text-[#9AA5B1] leading-[1.5]">
+                      {s.desc}
+                    </div>
                   </button>
                 ))}
               </div>
 
-              <div className="home-footer">
+              <p className="text-[11px] text-[#9AA5B1] mt-[10px] pb-2">
                 Serene is not a substitute for professional medical advice.
-              </div>
+              </p>
             </div>
           )}
 
-          {/* CHAT VIEW */}
-          {activeView === "chat" && (
-            <div className="chat-view">
-              <div className="messages-area">
-                <div className="date-divider">
-                  <span className="date-pill">Today</span>
+          {/* ── CHAT VIEW ── */}
+          {view === "chat" && (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Messages area */}
+              <div className="flex-1 overflow-y-auto px-6 py-7 flex flex-col gap-[18px] msg-scroll">
+                <div className="flex justify-center">
+                  <span className="bg-white border border-[#E4EEF3] rounded-full px-4 py-1 text-[11px] font-semibold text-[#9AA5B1]">
+                    Today
+                  </span>
                 </div>
 
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`msg-row ${msg.role === "user" ? "user" : ""}`}
-                  >
-                    {msg.role !== "user" && (
-                      <div style={{ width: 36, flexShrink: 0, paddingTop: 2 }}>
-                        <img
-                          src="logo.png"
-                          alt="serene"
-                          style={{ width: 22 }}
-                        />
-                      </div>
-                    )}
-                    <div className="msg-col">
-                      <div className={`bubble ${msg.role}`}>
-                        {msg.role === "assistant" ? (
-                          // ✅ Render markdown for AI messages
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
-                        ) : (
-                          // Plain text for user messages
-                          msg.content
-                        )}
-                      </div>
-                      <span className="msg-time">
-                        {fmtTime(msg.created_at)}
-                      </span>
-                    </div>
-                  </div>
+                {messages.map((msg, i) => (
+                  <Bubble key={msg.id || i} msg={msg} />
                 ))}
 
                 {loading && (
-                  <div className="msg-row">
-                    <div style={{ width: 36, flexShrink: 0, paddingTop: 2 }}>
-                      <img src="logo.png" alt="serene" style={{ width: 22 }} />
+                  <div className="flex gap-[10px]">
+                    <div className="w-9 h-9 rounded-full bg-[#E8F8FC] flex items-center justify-center shrink-0 mt-0.5 border border-[#D4EEF7]">
+                      <img
+                        src="/logo.png"
+                        alt="Serene"
+                        className="w-5 h-5 object-contain"
+                      />
                     </div>
-                    <div className="msg-col">
-                      <div
-                        className="bubble assistant"
-                        style={{
-                          display: "flex",
-                          gap: 5,
-                          alignItems: "center",
-                          padding: "14px 18px",
-                        }}
-                      >
-                        <div className="typing-dot" />
-                        <div className="typing-dot" />
-                        <div className="typing-dot" />
-                      </div>
+                    <div className="bg-white border border-[#E4EEF3] rounded-[18px] rounded-tl-[4px] shadow-sm">
+                      <TypingDots />
                     </div>
                   </div>
                 )}
@@ -551,22 +532,24 @@ export default function Chat() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="chat-input-area">
-                <div className="quick-chips">
-                  {quickChips.map((p) => (
+              {/* Input area */}
+              <div className="px-5 pb-4 pt-[10px] bg-white border-t border-[#E4EEF3] shrink-0">
+                {/* Quick chips */}
+                <div className="flex gap-2 overflow-x-auto no-sb pb-[10px]">
+                  {QUICK_CHIPS.map((p) => (
                     <button
                       key={p}
-                      className="qchip"
                       onClick={() => handleSend(p)}
+                      className="shrink-0 text-[12px] font-bold text-[#22B1D4] border-[1.5px] border-[rgba(34,177,212,.3)] bg-white px-[13px] py-[5px] rounded-full hover:bg-[#E8F8FC] hover:border-[#22B1D4] transition-all whitespace-nowrap"
                     >
                       {p}
                     </button>
                   ))}
                 </div>
-                <div className="chat-input-inner">
+
+                {/* Textarea */}
+                <div className="flex items-end bg-[#F8FAFC] border-[1.5px] border-[#E4EEF3] rounded-2xl overflow-hidden focus-within:border-[#22B1D4] focus-within:shadow-[0_0_0_3px_rgba(34,177,212,.1)] transition-all">
                   <textarea
-                    className="chat-textarea"
-                    placeholder="Type your message…"
                     value={message}
                     rows={1}
                     onChange={(e) => setMessage(e.target.value)}
@@ -576,27 +559,47 @@ export default function Chat() {
                         handleSend();
                       }
                     }}
+                    placeholder="Type your message…"
+                    className="flex-1 bg-transparent border-none outline-none px-3 py-3 resize-none text-[14px] text-[#1F2933] placeholder:text-[#9AA5B1] min-h-[48px] max-h-[120px] leading-[1.5]"
                   />
-                  <div className="chat-side-btns">
-                    <button className="cs-btn">
-                      <span className="material-icons-round">attach_file</span>
+                  <div className="flex items-center gap-1 px-[10px] py-2">
+                    <button className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#9AA5B1] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors">
+                      <span className="material-symbols-outlined text-[18px]">
+                        attach_file
+                      </span>
                     </button>
-                    <button className="cs-btn">
-                      <span className="material-icons-round">mic_none</span>
+                    <button className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#9AA5B1] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors">
+                      <span className="material-symbols-outlined text-[18px]">
+                        mic_none
+                      </span>
                     </button>
                     <button
-                      className={`send-chat ${message.trim() && !loading ? "active" : "inactive"}`}
                       onClick={() => handleSend()}
                       disabled={!message.trim() || loading}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                        message.trim() && !loading
+                          ? "text-white shadow-[0_3px_12px_rgba(34,177,212,.4)]"
+                          : "bg-[#E4EEF3] text-[#9AA5B1] cursor-not-allowed"
+                      }`}
+                      style={
+                        message.trim() && !loading
+                          ? {
+                              background:
+                                "linear-gradient(135deg,#22B1D4,#189AB4)",
+                            }
+                          : {}
+                      }
                     >
-                      <span className="material-icons-round">arrow_upward</span>
+                      <span className="material-symbols-outlined text-[18px]">
+                        arrow_upward
+                      </span>
                     </button>
                   </div>
                 </div>
-                <div className="chat-footer">
+                <p className="text-center text-[10px] text-[#B8C4CE] mt-2">
                   Serene AI can make mistakes. If you're in crisis, call iCall:
                   9152987821
-                </div>
+                </p>
               </div>
             </div>
           )}

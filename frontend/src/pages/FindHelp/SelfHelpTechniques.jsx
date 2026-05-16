@@ -1,370 +1,346 @@
+// src/pages/FindHelp/SelfHelpTechniques.jsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../../components/Navbar";
-import { useFindHelp } from "../../context/FindHelpContext";
+import AppLayout from "../../components/AppLayout";
+import GlassCard from "../../components/GlassCard";
 
-const DIFFICULTY_COLOR = {
-  Beginner: { bg: "#F0FDF4", text: "#10B981" },
-  Intermediate: { bg: "#FFF7ED", text: "#F59E0B" },
-  Advanced: { bg: "#FEF2F2", text: "#EF4444" },
-};
+const CATEGORIES = ["All", "Breathing", "Mindfulness", "CBT", "Movement", "Sleep", "Journaling"];
 
-function TechniqueModal({ technique, onClose }) {
-  const [activeStep, setActiveStep] = useState(0);
+const TECHNIQUES = [
+  {
+    title: "Box Breathing",
+    category: "Breathing",
+    duration: "4 min",
+    icon: "air",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    desc: "A powerful technique used by Navy SEALs to manage stress. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4.",
+    steps: [
+      "Find a comfortable seated position and close your eyes",
+      "Inhale slowly through your nose for 4 counts",
+      "Hold your breath for 4 counts",
+      "Exhale completely through your mouth for 4 counts",
+      "Hold empty for 4 counts",
+      "Repeat for 4–8 cycles",
+    ],
+    tags: ["Anxiety", "Stress", "Focus"],
+  },
+  {
+    title: "5-4-3-2-1 Grounding",
+    category: "Mindfulness",
+    duration: "5 min",
+    icon: "anchor",
+    color: "text-[#006b56]",
+    bg: "bg-[#75f9d3]/20",
+    desc: "A sensory grounding technique that brings you into the present moment instantly — perfect for panic attacks or overwhelming anxiety.",
+    steps: [
+      "Name 5 things you can see around you",
+      "Notice 4 things you can physically feel (texture, temperature)",
+      "Identify 3 things you can hear right now",
+      "Find 2 things you can smell (or like to smell)",
+      "Notice 1 thing you can taste",
+      "Take 3 slow deep breaths to close",
+    ],
+    tags: ["Panic", "Anxiety", "Grounding"],
+  },
+  {
+    title: "Cognitive Restructuring",
+    category: "CBT",
+    duration: "10 min",
+    icon: "psychology",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    desc: "Challenge and reframe negative thought patterns. Identify the thought, examine the evidence, and create a balanced alternative.",
+    steps: [
+      "Write down the negative automatic thought",
+      "Rate how much you believe it (0–100%)",
+      "List all evidence that supports this thought",
+      "List all evidence that contradicts this thought",
+      "Write a balanced, realistic alternative thought",
+      "Re-rate belief in the original thought",
+    ],
+    tags: ["Depression", "Anxiety", "Negative Thinking"],
+  },
+  {
+    title: "Progressive Muscle Relaxation",
+    category: "Movement",
+    duration: "15 min",
+    icon: "accessibility_new",
+    color: "text-[#8a4c05]",
+    bg: "bg-[#ffdcc2]/30",
+    desc: "Release physical tension stored in your body by systematically tensing and relaxing muscle groups from feet to face.",
+    steps: [
+      "Lie down in a comfortable position",
+      "Start with your feet — tense them hard for 5 seconds",
+      "Release suddenly and notice the relaxation for 30 seconds",
+      "Move up to calves, thighs, abdomen, hands, arms, shoulders",
+      "Finish with face muscles — scrunch then release",
+      "Lie still for 2 minutes noticing body sensations",
+    ],
+    tags: ["Stress", "Sleep", "Tension"],
+  },
+  {
+    title: "Gratitude Journaling",
+    category: "Journaling",
+    duration: "5 min",
+    icon: "edit_note",
+    color: "text-[#006b56]",
+    bg: "bg-[#75f9d3]/20",
+    desc: "Research shows writing 3 specific things you're grateful for daily rewires the brain toward positivity within 3 weeks.",
+    steps: [
+      "Set a consistent time each day (morning or night works best)",
+      "Write 3 specific things you're genuinely grateful for",
+      "For each, write WHY you're grateful — the reason matters",
+      "Include at least one small, everyday thing",
+      "Optionally write one person you appreciate and why",
+      "Close with one positive expectation for tomorrow",
+    ],
+    tags: ["Depression", "Mood", "Wellbeing"],
+  },
+  {
+    title: "Sleep Hygiene Protocol",
+    category: "Sleep",
+    duration: "Nightly",
+    icon: "bedtime",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    desc: "A structured evening routine that signals your brain it's time to wind down, improving both sleep quality and duration.",
+    steps: [
+      "Set a fixed sleep and wake time — even on weekends",
+      "No screens 60 minutes before bed (use night mode if needed)",
+      "Keep your room cool (18–20°C), dark, and quiet",
+      "Avoid caffeine after 2pm and heavy meals within 3hrs of sleep",
+      "Do 5 minutes of slow breathing or body scan before sleep",
+      "If you can't sleep in 20 min, get up and do something calm",
+    ],
+    tags: ["Sleep", "Anxiety", "Rest"],
+  },
+  {
+    title: "Mindful Walking",
+    category: "Mindfulness",
+    duration: "10 min",
+    icon: "directions_walk",
+    color: "text-[#8a4c05]",
+    bg: "bg-[#ffdcc2]/30",
+    desc: "Transform a simple walk into a meditation. Bring full attention to each step, breath, and sensation to clear mental clutter.",
+    steps: [
+      "Find a quiet path — indoors or outdoors, even 10 steps is enough",
+      "Stand still, take 3 deep breaths, feel your feet on the ground",
+      "Walk at half your normal pace",
+      "Notice every sensation — the lift of your foot, the shift of weight",
+      "When your mind wanders, gently return focus to your feet",
+      "After 10 minutes, stand still again and notice how you feel",
+    ],
+    tags: ["Stress", "Focus", "Mindfulness"],
+  },
+  {
+    title: "Emotion Regulation (TIPP)",
+    category: "CBT",
+    duration: "15 min",
+    icon: "thermometer",
+    color: "text-[#006b56]",
+    bg: "bg-[#75f9d3]/20",
+    desc: "A DBT skill for rapidly reducing intense emotional distress using Temperature, Intense exercise, Paced breathing, and Paired muscle relaxation.",
+    steps: [
+      "Temperature: Splash cold water on your face or hold an ice cube",
+      "Intense exercise: Do 20 jumping jacks or run in place for 1 minute",
+      "Paced breathing: Slow your exhale to be longer than your inhale",
+      "Paired muscle relaxation: Tense muscles on inhale, relax on exhale",
+      "Repeat whichever step worked best 2–3 more times",
+      "Check in — rate your distress level (1–10) before and after",
+    ],
+    tags: ["Distress", "Emotions", "DBT"],
+  },
+  {
+    title: "Loving-Kindness Meditation",
+    category: "Mindfulness",
+    duration: "10 min",
+    icon: "favorite",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    desc: "Cultivate compassion for yourself and others. Shown to reduce self-criticism, loneliness, and depressive symptoms.",
+    steps: [
+      "Sit comfortably, close your eyes, take 3 deep breaths",
+      "Bring yourself to mind. Silently repeat: 'May I be happy. May I be healthy. May I be at peace.'",
+      "Think of someone you love easily. Send them the same wishes",
+      "Think of a neutral person (acquaintance). Send them the wishes",
+      "Think of a difficult person. Try to send them the same",
+      "Finally expand to all beings: 'May all beings be happy and free'",
+    ],
+    tags: ["Self-compassion", "Depression", "Loneliness"],
+  },
+];
 
+function TechniqueCard({ t, onSelect }) {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(31,41,51,0.6)", backdropFilter: "blur(4px)" }}
-      onClick={onClose}
+    <GlassCard
+      className="p-5 flex flex-col gap-3 cursor-pointer hover:scale-[1.01] transition-transform duration-200"
+      onClick={() => onSelect(t)}
     >
-      <div
-        className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
-        style={{ boxShadow: "0 24px 64px rgba(34,177,212,0.18)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header bar */}
-        <div
-          className="h-2 rounded-t-2xl"
-          style={{ background: technique.color }}
-        />
-
-        <div className="p-6">
-          {/* Top */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <span
-                className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                style={{
-                  background: `${technique.color}22`,
-                  color: technique.color,
-                }}
-              >
-                {technique.category}
-              </span>
-              <h2 className="text-xl font-serif font-bold text-[#1F2933] mt-2">
-                {technique.title}
-              </h2>
-              <p className="text-sm text-[#52606D] mt-0.5">
-                {technique.subtitle}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-[#F8FAFC] text-[#9AA5B1] hover:text-[#1F2933] transition-colors flex-shrink-0"
-            >
-              <span className="material-icons-round">close</span>
-            </button>
-          </div>
-
-          {/* Meta */}
-          <div className="flex gap-3 mb-5">
-            <span className="flex items-center gap-1 text-xs text-[#52606D]">
-              <span className="material-icons-round text-sm text-[#22B1D4]">
-                schedule
-              </span>
-              {technique.duration}
-            </span>
-            <span
-              className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={
-                DIFFICULTY_COLOR[technique.difficulty] ||
-                DIFFICULTY_COLOR.Beginner
-              }
-            >
-              {technique.difficulty}
-            </span>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-[#52606D] leading-relaxed mb-6">
-            {technique.description}
-          </p>
-
-          {/* Steps */}
-          <div>
-            <h3 className="font-semibold text-[#1F2933] mb-3 text-sm uppercase tracking-wide">
-              Steps
-            </h3>
-            <div className="space-y-3">
-              {technique.steps.map((step, i) => (
-                <div
-                  key={i}
-                  onClick={() => setActiveStep(i)}
-                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                    activeStep === i
-                      ? "border-2 bg-opacity-5"
-                      : "border border-[#E8F4F8] hover:border-[#22B1D4]/40"
-                  }`}
-                  style={
-                    activeStep === i
-                      ? {
-                          borderColor: technique.color,
-                          background: `${technique.color}0D`,
-                        }
-                      : {}
-                  }
-                >
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
-                    style={{
-                      background:
-                        activeStep === i ? technique.color : "#E8F4F8",
-                      color: activeStep === i ? "#fff" : "#9AA5B1",
-                    }}
-                  >
-                    {i + 1}
-                  </div>
-                  <p className="text-sm text-[#1F2933] leading-relaxed">
-                    {step}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA */}
-          <button
-            className="w-full mt-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{
-              background: technique.color,
-              boxShadow: `0 4px 16px ${technique.color}44`,
-            }}
-          >
-            Start This Exercise
-          </button>
+      <div className="flex items-start justify-between">
+        <div className={`p-2.5 rounded-xl ${t.bg}`}>
+          <span className={`material-symbols-outlined ${t.color}`}>{t.icon}</span>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-[10px] font-mono bg-[#f0f3ff] text-[#5742d3] px-2 py-0.5 rounded-full">
+            {t.category}
+          </span>
+          <span className="text-[10px] text-[#787586] font-mono">{t.duration}</span>
         </div>
       </div>
-    </div>
+      <div>
+        <h4 className="font-semibold text-[#111c2d] text-sm mb-1">{t.title}</h4>
+        <p className="text-xs text-[#787586] leading-relaxed line-clamp-2">{t.desc}</p>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mt-auto">
+        {t.tags.map((tag) => (
+          <span key={tag} className="text-[10px] font-mono bg-[#e7eeff] text-[#5742d3] px-2 py-0.5 rounded-full">
+            {tag}
+          </span>
+        ))}
+      </div>
+      <button className={`flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-semibold transition-all ${t.bg} ${t.color} hover:opacity-80`}>
+        <span className="material-symbols-outlined text-[15px]">play_arrow</span>
+        Start Technique
+      </button>
+    </GlassCard>
   );
 }
 
-function TechniqueCard({ technique, onClick }) {
-  const diff =
-    DIFFICULTY_COLOR[technique.difficulty] || DIFFICULTY_COLOR.Beginner;
+function TechniqueModal({ technique, onClose }) {
+  const [step, setStep] = useState(0);
+  if (!technique) return null;
+  const done = step >= technique.steps.length;
 
   return (
-    <div
-      className="bg-white rounded-2xl border border-[#E8F4F8] overflow-hidden cursor-pointer group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-      style={{ boxShadow: "0 2px 12px rgba(34,177,212,0.06)" }}
-      onClick={onClick}
-    >
-      {/* Thumbnail */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="relative h-44 overflow-hidden"
-        style={{ background: technique.color }}
+        className="glass-card rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-white/40 relative"
+        onClick={(e) => e.stopPropagation()}
       >
-        <img
-          src={technique.thumbnail}
-          alt={technique.title}
-          className="w-full h-full object-cover mix-blend-overlay opacity-40"
-        />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">
-            {technique.category}
-          </p>
-          <p className="text-white font-bold text-sm uppercase tracking-wide leading-tight">
-            {technique.videoLabel}
-          </p>
+        <button onClick={onClose} className="absolute top-4 right-4 text-[#787586] hover:text-[#111c2d]">
+          <span className="material-symbols-outlined">close</span>
+        </button>
+
+        <div className={`w-12 h-12 rounded-2xl ${technique.bg} flex items-center justify-center mb-4`}>
+          <span className={`material-symbols-outlined text-2xl ${technique.color}`}>{technique.icon}</span>
         </div>
-        {/* Play button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-            <span className="material-icons-round text-[#1F2933] text-xl">
-              play_arrow
-            </span>
+
+        <h3 className="font-display text-xl font-bold text-[#111c2d] mb-1">{technique.title}</h3>
+        <p className="text-xs text-[#787586] font-mono mb-4">{technique.duration} · {technique.category}</p>
+
+        {/* Progress */}
+        <div className="h-1 bg-[#e7eeff] rounded-full mb-5 overflow-hidden">
+          <div
+            className="h-full bg-[#5742d3] rounded-full transition-all duration-500"
+            style={{ width: `${done ? 100 : (step / technique.steps.length) * 100}%` }}
+          />
+        </div>
+
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-16 h-16 rounded-full bg-[#75f9d3]/30 flex items-center justify-center mx-auto mb-3">
+              <span className="material-symbols-outlined text-3xl text-[#006b56]">check_circle</span>
+            </div>
+            <h4 className="font-display text-lg font-bold text-[#111c2d] mb-1">Well done!</h4>
+            <p className="text-[#787586] text-sm">You completed {technique.title}. Take a moment to notice how you feel.</p>
+            <button onClick={onClose} className="mt-4 bg-[#5742d3] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4126bd] transition-colors">
+              Close
+            </button>
           </div>
-        </div>
-        {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-white/30" />
-      </div>
-
-      <div className="p-5">
-        <h3 className="font-serif font-bold text-[#1F2933] text-base mb-0.5">
-          {technique.title}
-        </h3>
-        <p className="text-xs text-[#52606D] mb-3">{technique.subtitle}</p>
-
-        <p className="text-sm text-[#627D98] line-clamp-2 mb-4">
-          {technique.description}
-        </p>
-
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <span className="flex items-center gap-1 text-xs text-[#52606D]">
-              <span className="material-icons-round text-sm text-[#22B1D4]">
-                schedule
-              </span>
-              {technique.duration}
-            </span>
-            <span
-              className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={diff}
-            >
-              {technique.difficulty}
-            </span>
-          </div>
-          <span
-            className="text-xs font-semibold flex items-center gap-0.5 transition-colors group-hover:underline"
-            style={{ color: technique.color }}
-          >
-            Start
-            <span className="material-icons-round text-sm">arrow_forward</span>
-          </span>
-        </div>
+        ) : (
+          <>
+            <div className="mb-5">
+              <p className="text-[10px] font-mono text-[#787586] mb-2 uppercase tracking-widest">
+                Step {step + 1} of {technique.steps.length}
+              </p>
+              <p className="text-[#111c2d] text-sm leading-relaxed">{technique.steps[step]}</p>
+            </div>
+            <div className="flex gap-3">
+              {step > 0 && (
+                <button
+                  onClick={() => setStep(step - 1)}
+                  className="px-4 py-2.5 rounded-xl glass-card border border-white/30 text-[#474554] text-sm"
+                >
+                  Back
+                </button>
+              )}
+              <button
+                onClick={() => setStep(step + 1)}
+                className="flex-1 py-2.5 rounded-xl bg-[#5742d3] text-white text-sm font-semibold hover:bg-[#4126bd] transition-colors"
+              >
+                {step === technique.steps.length - 1 ? "Complete" : "Next Step"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 export default function SelfHelpTechniques() {
-  const { selfHelpTechniques, categories } = useFindHelp();
   const [activeCategory, setActiveCategory] = useState("All");
-  const [selected, setSelected] = useState(null);
+  const [selectedTechnique, setSelectedTechnique] = useState(null);
 
-  const filtered =
-    activeCategory === "All"
-      ? selfHelpTechniques
-      : selfHelpTechniques.filter((t) => t.category === activeCategory);
+  const filtered = activeCategory === "All"
+    ? TECHNIQUES
+    : TECHNIQUES.filter((t) => t.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
-
-      {/* Breadcrumb */}
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <nav className="flex items-center gap-1.5 text-sm text-[#9AA5B1]">
-          <Link to="/" className="hover:text-[#22B1D4] transition-colors">
-            Home
-          </Link>
-          <span className="material-icons-round text-sm">chevron_right</span>
-          <Link
-            to="/find-help"
-            className="hover:text-[#22B1D4] transition-colors"
-          >
-            Find Help
-          </Link>
-          <span className="material-icons-round text-sm">chevron_right</span>
-          <span className="text-[#1F2933] font-medium">
-            Self-Help Techniques
-          </span>
-        </nav>
-      </div>
-
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-6 pb-8">
-        <div
-          className="rounded-2xl p-8 md:p-12 relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 60%, #4C1D95 100%)",
-          }}
-        >
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-              <span className="material-icons-round text-sm">
-                self_improvement
-              </span>
-              Evidence-based techniques
-            </div>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
-              Self-Help Techniques
-            </h1>
-            <p className="text-white/75 text-base md:text-lg max-w-xl">
-              Practical, therapist-approved exercises you can try on your own —
-              anytime, anywhere.
+    <AppLayout title="Self-Help Techniques" subtitle="Evidence-based tools you can use right now">
+      <div className="space-y-5">
+        {/* Intro Banner */}
+        <GlassCard className="p-5 flex gap-4 items-center border border-[#e4dfff]">
+          <div className="w-12 h-12 rounded-full bg-[#5742d3]/10 flex items-center justify-center shrink-0 animate-breathe">
+            <span className="material-symbols-outlined text-2xl text-[#5742d3]">self_improvement</span>
+          </div>
+          <div>
+            <h3 className="font-display text-base font-bold text-[#111c2d]">Science-backed techniques</h3>
+            <p className="text-sm text-[#787586] leading-relaxed">
+              All techniques here are drawn from CBT, DBT, mindfulness research, and clinical psychology.
+              Click any card to follow a guided step-by-step session.
             </p>
           </div>
-          <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-          <div className="absolute bottom-0 right-20 w-32 h-32 rounded-full bg-white/10 translate-y-1/2 pointer-events-none" />
-        </div>
-      </div>
+        </GlassCard>
 
-      {/* Tab Nav */}
-      <div className="max-w-6xl mx-auto px-6 mb-6">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {[
-            {
-              label: "Helplines",
-              to: "/find-help/helplines",
-              active: false,
-              icon: "phone_in_talk",
-            },
-            {
-              label: "Find a Therapist",
-              to: "/find-help/therapist",
-              active: false,
-              icon: "person_search",
-            },
-            {
-              label: "Self-Help Techniques",
-              to: "/find-help/self-help",
-              active: true,
-              icon: "self_improvement",
-            },
-          ].map((tab) => (
-            <Link
-              key={tab.label}
-              to={tab.to}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                tab.active
-                  ? "bg-[#22B1D4] text-white shadow-md"
-                  : "bg-white text-[#52606D] border border-[#D9E2EC] hover:border-[#22B1D4] hover:text-[#22B1D4]"
-              }`}
-            >
-              <span className="material-icons-round text-base">{tab.icon}</span>
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Category Filter */}
-      <div className="max-w-6xl mx-auto px-6 mb-8">
-        <div className="flex gap-2 flex-wrap">
-          {categories.map((cat) => (
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-medium transition-all ${
                 activeCategory === cat
-                  ? "bg-[#8B5CF6] text-white border-[#8B5CF6] shadow-md"
-                  : "bg-white text-[#52606D] border-[#D9E2EC] hover:border-[#8B5CF6] hover:text-[#8B5CF6]"
+                  ? "bg-[#5742d3] text-white shadow-md shadow-[#5742d3]/20"
+                  : "glass-card border border-white/30 text-[#474554] hover:text-[#5742d3] hover:border-[#5742d3]/30"
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Grid */}
-      <div className="max-w-6xl mx-auto px-6 pb-16">
-        <p className="text-sm text-[#9AA5B1] mb-6">
-          <span className="font-semibold text-[#1F2933]">
-            {filtered.length}
-          </span>{" "}
-          techniques
-          {activeCategory !== "All" ? ` for ${activeCategory}` : ""}
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Technique Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((t) => (
-            <TechniqueCard
-              key={t.id}
-              technique={t}
-              onClick={() => setSelected(t)}
-            />
+            <TechniqueCard key={t.title} t={t} onSelect={setSelectedTechnique} />
           ))}
         </div>
+
+        {/* Disclaimer */}
+        <GlassCard className="p-4 flex gap-3">
+          <span className="material-symbols-outlined text-[#5742d3] shrink-0">info</span>
+          <p className="text-xs text-[#787586] leading-relaxed">
+            These techniques are educational and complementary — they are not a replacement for professional
+            mental health treatment. If you are in crisis, please visit the Crisis Helplines page.
+          </p>
+        </GlassCard>
       </div>
 
       {/* Modal */}
-      {selected && (
-        <TechniqueModal
-          technique={selected}
-          onClose={() => setSelected(null)}
-        />
+      {selectedTechnique && (
+        <TechniqueModal technique={selectedTechnique} onClose={() => setSelectedTechnique(null)} />
       )}
-    </div>
+    </AppLayout>
   );
 }

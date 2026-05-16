@@ -52,3 +52,103 @@ Bad request:
 {'message': "The requested model 'google/gemma-3-4b-it' is not supported by any provider you have enabled.", 'type': 'invalid_request_error', 'param': 'model', 'code': 'model_not_supported'}
 INFO 2026-05-10 09:00:18,381 model_service HF response ok | model=google/gemma-4-31B-it:deepinfra
 INFO 2026-05-10 09:14:18,265 model_service HF response ok | model=google/gemma-4-31B-it:deepinfra
+ERROR 2026-05-16 06:46:28,249 ai_engine LangGraph agent build failed — missing package: cannot import name 'tool' from 'langchain.agents' (D:\Serene website\serene-venv\Lib\site-packages\langchain\agents\__init__.py)
+Run: pip install langchain langchain-openai langgraph
+WARNING 2026-05-16 06:46:28,249 ai_engine Agent unavailable — falling back to direct HuggingFace call
+ERROR 2026-05-16 06:53:47,478 ai_engine LangGraph agent build failed — missing package: cannot import name 'tool' from 'langchain.agents' (D:\Serene website\serene-venv\Lib\site-packages\langchain\agents\__init__.py)
+Run: pip install langchain langchain-openai langgraph
+WARNING 2026-05-16 06:53:47,479 ai_engine Agent unavailable — falling back to direct HuggingFace call
+ERROR 2026-05-16 06:59:48,711 ai_engine LangGraph agent build failed — missing package: cannot import name 'tool' from 'langchain.agents' (D:\Serene website\serene-venv\Lib\site-packages\langchain\agents\__init__.py)
+Run: pip install langchain langchain-openai langgraph
+WARNING 2026-05-16 06:59:48,712 ai_engine Agent unavailable — falling back to direct HuggingFace call
+ERROR 2026-05-16 07:03:58,340 ai_engine LangGraph agent build failed — missing package: cannot import name 'tool' from 'langchain.agents' (D:\Serene website\serene-venv\Lib\site-packages\langchain\agents\__init__.py)
+Run: pip install langchain langchain-openai langgraph
+WARNING 2026-05-16 07:03:58,341 ai_engine Agent unavailable — falling back to direct HuggingFace call
+INFO 2026-05-16 07:20:20,771 ai_engine LangGraph agent built successfully | model=gpt-5.4-mini
+WARNING 2026-05-16 07:20:27,739 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 07:20:30,308 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 07:20:40,622 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=365
+INFO 2026-05-16 07:27:54,536 ai_engine LangGraph agent built successfully | model=gpt-5.4-mini
+WARNING 2026-05-16 07:27:58,654 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 07:28:01,748 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 07:28:14,776 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=561 | memory=yes
+INFO 2026-05-16 07:33:11,867 ai_engine LangGraph agent built successfully | model=gpt-5.4-mini
+WARNING 2026-05-16 07:33:18,788 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 07:33:20,900 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 07:33:32,241 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=363 | memory=yes
+INFO 2026-05-16 20:38:33,433 ai_engine LangGraph agent built successfully | model=gpt-5.4-mini
+WARNING 2026-05-16 20:38:41,265 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 20:38:44,131 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 20:39:07,533 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=103 | memory=yes
+WARNING 2026-05-16 20:39:58,890 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 20:40:01,081 agent_tools Tool: ask_mental_health_specialist called
+ERROR 2026-05-16 20:42:01,615 agent_tools HuggingFace specialist call failed: Server error '504 Gateway Time-out' for url 'https://router.huggingface.co/v1/chat/completions' (Amz CF ID: Z3EjyNulcm0M0DF3b-ewtbU6IOauaSwoELWtUfP86DZRA3xc5cao1g==)
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504
+INFO 2026-05-16 20:42:04,127 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=723 | memory=yes
+INFO 2026-05-16 20:54:39,258 ai_engine LangGraph agent built successfully | model=gpt-5.4-mini
+WARNING 2026-05-16 20:54:44,276 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 20:54:46,027 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 20:54:55,707 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=438 | memory=yes
+WARNING 2026-05-16 20:56:11,230 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 20:56:13,028 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 20:56:20,514 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=65 | memory=yes
+INFO 2026-05-16 21:03:52,531 ai_engine LangGraph agent built successfully | model=gpt-4o-mini
+WARNING 2026-05-16 21:03:56,306 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+ERROR 2026-05-16 21:03:59,217 ai_engine Agent generate_response error: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 21:05:27,157 ai_engine LangGraph agent built successfully | model=gpt-4.1-mini
+WARNING 2026-05-16 21:05:33,803 memory RAG retrieve_relevant_entries failed user=3: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+ERROR 2026-05-16 21:05:36,565 ai_engine Agent generate_response error: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+INFO 2026-05-16 21:19:27,586 ai_engine LangGraph agent built successfully | model=llama-3.3-70b-versatile
+INFO 2026-05-16 21:19:38,233 ai_engine Loading embedding model: BAAI/bge-small-en-v1.5 (first load only)
+INFO 2026-05-16 21:20:01,819 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: E
+INFO 2026-05-16 21:20:02,316 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:04,089 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:06,155 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:07,944 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:09,452 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:12,281 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:14,099 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:25,183 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:38,977 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:20:54,148 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:21:10,940 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:21:27,583 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:21:45,349 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:22:04,210 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:22:24,802 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:22:45,901 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:23:44,285 ai_engine LangGraph agent built successfully | model=llama-3.3-70b-versatile
+INFO 2026-05-16 21:23:49,109 ai_engine Loading embedding model: BAAI/bge-small-en-v1.5 (first load only)
+INFO 2026-05-16 21:23:56,518 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: E
+INFO 2026-05-16 21:23:56,992 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:23:58,508 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=47 | memory=yes
+INFO 2026-05-16 21:24:22,744 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: E
+INFO 2026-05-16 21:24:23,106 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:24:24,615 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=47 | memory=yes
+INFO 2026-05-16 21:24:47,419 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: E
+INFO 2026-05-16 21:24:47,951 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:24:49,587 ai_engine Agent response | tool=ask_mental_health_specialist | user=shruti | chars=47 | memory=yes
+INFO 2026-05-16 21:26:35,436 ai_engine LangGraph agent built successfully | model=llama-3.3-70b-versatile
+INFO 2026-05-16 21:26:40,633 ai_engine Loading embedding model: BAAI/bge-small-en-v1.5 (first load only)
+INFO 2026-05-16 21:26:47,777 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: S
+INFO 2026-05-16 21:26:48,281 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:26:50,664 agent_tools Tool: ask_mental_health_specialist called
+WARNING 2026-05-16 21:26:52,123 ai_engine LangGraph hit step limit — calling Groq directly
+INFO 2026-05-16 21:26:53,141 ai_engine Agent response | tool=direct_groq_fallback | user=shruti | chars=559 | memory=yes
+INFO 2026-05-16 21:27:52,640 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: S
+INFO 2026-05-16 21:27:53,132 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:27:55,004 agent_tools Tool: ask_mental_health_specialist called
+WARNING 2026-05-16 21:27:57,036 ai_engine LangGraph hit step limit — calling Groq directly
+INFO 2026-05-16 21:27:57,822 ai_engine Agent response | tool=direct_groq_fallback | user=shruti | chars=370 | memory=yes
+INFO 2026-05-16 21:28:44,603 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: S
+WARNING 2026-05-16 21:28:45,233 agent_tools Tool: emergency_call_tool triggered
+WARNING 2026-05-16 21:28:45,234 agent_tools DEBUG=True: call suppressed (would have called +917498896771)
+INFO 2026-05-16 21:28:45,783 ai_engine Agent response | tool=emergency_call_tool | user=shruti | chars=570 | memory=yes
+INFO 2026-05-16 21:29:16,132 ai_engine Memory ready | user=3 | has_data=True | preview: User: shruti Mood: no entries logged yet — encourage them to log Last session: I
+INFO 2026-05-16 21:29:16,595 agent_tools Tool: ask_mental_health_specialist called
+INFO 2026-05-16 21:29:18,260 agent_tools Tool: ask_mental_health_specialist called
+WARNING 2026-05-16 21:29:19,669 ai_engine LangGraph hit step limit — calling Groq directly
+INFO 2026-05-16 21:29:20,580 ai_engine Agent response | tool=direct_groq_fallback | user=shruti | chars=473 | memory=yes
+INFO 2026-05-16 21:33:16,202 ai_engine Loading embedding model: BAAI/bge-small-en-v1.5 (first load only)
+INFO 2026-05-16 21:33:23,464 ai_engine Memory ready | user=3 | has_data=True | preview: Name: shruti Mood: no entries logged yet (encourage them to log mood) Last session summary: Shruti, 
+INFO 2026-05-16 21:33:24,615 ai_engine Agent response | tool=direct_groq | user=shruti | chars=455 | memory=yes

@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
@@ -5,24 +6,23 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import Dashboard from "./pages/Dashboard";
-import Step1 from "./pages/Onboarding/Step1";
-import Step2 from "./pages/Onboarding/Step2";
-import Step3 from "./pages/Onboarding/Step3";
-import Step4 from "./pages/Onboarding/Step4";
+import Mood from "./pages/Mood";
+import Tests from "./pages/Tests";
+import Profile from "./pages/Profile";
+import OnboardingFlow from "./pages/Onboarding/OnboardingFlow";
 import Helplines from "./pages/FindHelp/Helplines";
 import FindTherapist from "./pages/FindHelp/FindTherapist";
 import SelfHelpTechniques from "./pages/FindHelp/SelfHelpTechniques";
-import { FindHelpProvider } from "./context/FindHelpContext";
 
 /** Redirect unauthenticated users to /login */
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex items-center justify-center bg-[#f9f9ff]">
         <div className="flex flex-col items-center gap-3">
           <img src="/logo.png" alt="serene" className="w-12 animate-pulse" />
-          <p className="text-sm text-[#9AA5B1] font-medium">Loading…</p>
+          <p className="text-sm text-[#787586] font-mono tracking-widest">Loading…</p>
         </div>
       </div>
     );
@@ -30,7 +30,7 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-/** Redirect already-logged-in users away from login page */
+/** Redirect already-logged-in users away from login */
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -51,64 +51,34 @@ function AppRoutes() {
         }
       />
 
-      {/* Protected */}
+      {/* Onboarding — single multi-step page */}
       <Route
-        path="/chat"
+        path="/onboarding/:step"
         element={
           <ProtectedRoute>
-            <Chat />
+            <OnboardingFlow />
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Legacy step routes redirect to unified flow */}
+      <Route path="/onboarding/1" element={<Navigate to="/onboarding/1" replace />} />
+      <Route path="/onboarding/2" element={<Navigate to="/onboarding/2" replace />} />
+      <Route path="/onboarding/3" element={<Navigate to="/onboarding/3" replace />} />
+      <Route path="/onboarding/4" element={<Navigate to="/onboarding/4" replace />} />
 
-      {/* Onboarding (protected — user must be logged in) */}
-      <Route
-        path="/onboarding/1"
-        element={
-          <ProtectedRoute>
-            <Step1 />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/onboarding/2"
-        element={
-          <ProtectedRoute>
-            <Step2 />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/onboarding/3"
-        element={
-          <ProtectedRoute>
-            <Step3 />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/onboarding/4"
-        element={
-          <ProtectedRoute>
-            <Step4 />
-          </ProtectedRoute>
-        }
-      />
-      {/* Find Help Routes */}
+      {/* Protected App Pages */}
+      <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/mood" element={<ProtectedRoute><Mood /></ProtectedRoute>} />
+      <Route path="/tests" element={<ProtectedRoute><Tests /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
+      {/* Find Help — accessible without auth */}
       <Route path="/find-help/helplines" element={<Helplines />} />
       <Route path="/find-help/therapist" element={<FindTherapist />} />
       <Route path="/find-help/self-help" element={<SelfHelpTechniques />} />
 
-      {/* Navbar */}
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -118,9 +88,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <FindHelpProvider>
-          <AppRoutes />
-        </FindHelpProvider>
+        <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
   );

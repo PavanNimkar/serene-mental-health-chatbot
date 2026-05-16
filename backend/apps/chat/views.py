@@ -1,3 +1,13 @@
+"""
+apps/chat/views.py
+──────────────────
+CHANGES FROM ORIGINAL:
+  Line 1 change: import from ai_engine instead of model_service
+  Line 2 change: pass user=user to generate_response (enables memory + RAG)
+
+Everything else is identical to your original views.py.
+"""
+
 import logging
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -11,7 +21,9 @@ from .serializers import (
     ConversationListSerializer,
     SendMessageSerializer,
 )
-from .model_service import generate_response
+
+# ── CHANGE 1: import from ai_engine instead of model_service ─────────────────
+from .ai_engine import generate_response
 
 logger = logging.getLogger("apps.chat")
 
@@ -45,7 +57,6 @@ class SendMessageView(APIView):
     POST /api/v1/chat/send/
     Body: { "content": "...", "conversation_id": null | <int> }
     Creates conversation if conversation_id is null.
-    Calls MedGemma and returns assistant reply.
     """
 
     permission_classes = [IsAuthenticated]
@@ -82,8 +93,8 @@ class SendMessageView(APIView):
             "chat_style": user.chat_style,
         }
 
-        # Generate AI response
-        ai_text = generate_response(history, user_profile)
+        # ── CHANGE 2: pass user=user so memory + RAG can query the DB ────────
+        ai_text = generate_response(history, user_profile, user=user)
 
         # Persist assistant message
         ai_msg = Message.objects.create(

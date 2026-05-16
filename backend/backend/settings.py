@@ -44,6 +44,8 @@ LOCAL_APPS = [
     "apps.mood",
     "apps.tests_app",
     "apps.dashboard",
+    "apps.journal",
+    "apps.goals",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -144,9 +146,38 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# ── MedGemma / HuggingFace ────────────────────────────────────────────────────
-HUGGINGFACE_TOKEN = os.environ.get("HUGGINGFACE_TOKEN")
-HF_MODEL_ID = os.environ.get("HF_MODEL_ID", "meta-llama/Llama-3.1-8B-Instruct:novita")
+
+# ── Groq (FREE — agent orchestrator + therapeutic responses) ──────
+# Get key free at: https://console.groq.com
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get(
+    "GROQ_MODEL", "llama-3.3-70b-versatile"
+)  # therapeutic responses
+GROQ_AGENT_MODEL = os.environ.get(
+    "GROQ_AGENT_MODEL", "llama-3.3-70b-versatile"
+)  # agent routing
+
+# ── Local embeddings (FREE — no API key, runs on your CPU) ────────
+# Model downloads once (~33MB), then cached permanently
+# sentence-transformers handles this automatically
+EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+
+# ── RAG index directory ───────────────────────────────────────────
+RAG_INDEX_DIR = os.environ.get("RAG_INDEX_DIR", "./rag_indexes")
+
+# ── HuggingFace (keep — used as fallback if Groq unavailable) ─────
+# These should already be in your settings
+HUGGINGFACE_TOKEN = os.environ.get("HUGGINGFACE_TOKEN", "")
+HF_MODEL_ID = os.environ.get("HF_MODEL_ID", "google/gemma-4-31B-it:deepinfra")
+
+# ── Twilio (optional — emergency calls) ──────────────────────────
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM_NUMBER = os.environ.get("TWILIO_FROM_NUMBER", "")
+EMERGENCY_CONTACT = os.environ.get("EMERGENCY_CONTACT", "")
+
+# ── Google Places (optional — real therapist results) ────────────
+GOOGLE_PLACES_API_KEY = os.environ.get("GOOGLE_PLACES_API_KEY", "")
 
 # ── Redis / Caching ───────────────────────────────────────────────────────────
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")

@@ -1,387 +1,186 @@
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../../components/Navbar";
-import { useFindHelp } from "../../context/FindHelpContext";
+// src/pages/FindHelp/FindTherapist.jsx
+import { useState } from "react";
+import AppLayout from "../../components/AppLayout";
+import GlassCard from "../../components/GlassCard";
 
-const CITIES = [
-  "All Cities",
-  "Mumbai",
-  "Ahmedabad",
-  "Chennai",
-  "Goa",
-  "Kochi",
-  "Kolkata",
+const PLATFORMS = [
+  {
+    name: "iCall",
+    desc: "Affordable online therapy by TISS-trained counsellors. Sessions start at ₹300.",
+    url: "https://icallhelpline.org",
+    icon: "psychology",
+    badge: "₹300+",
+    badgeColor: "text-[#006b56] bg-[#75f9d3]/30",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    tags: ["Online", "Affordable", "Certified"],
+  },
+  {
+    name: "Practo",
+    desc: "Find psychiatrists and psychologists near you or via teleconsultation.",
+    url: "https://practo.com/therapists",
+    icon: "local_hospital",
+    badge: "In-person",
+    badgeColor: "text-[#5742d3] bg-[#e4dfff]/60",
+    color: "text-[#006b56]",
+    bg: "bg-[#75f9d3]/20",
+    tags: ["Near you", "In-person", "Online"],
+  },
+  {
+    name: "1to1help",
+    desc: "Confidential counselling for individuals and corporates across India.",
+    url: "https://1to1help.net",
+    icon: "handshake",
+    badge: "Corporate",
+    badgeColor: "text-[#8a4c05] bg-[#ffdcc2]/40",
+    color: "text-[#8a4c05]",
+    bg: "bg-[#ffdcc2]/30",
+    tags: ["Corporate", "Individual", "Hindi"],
+  },
+  {
+    name: "Talkspace",
+    desc: "Licensed therapists available via text, audio, and video sessions.",
+    url: "https://talkspace.com",
+    icon: "chat",
+    badge: "International",
+    badgeColor: "text-[#5742d3] bg-[#e4dfff]/60",
+    color: "text-[#5742d3]",
+    bg: "bg-[#e4dfff]/40",
+    tags: ["Text", "Video", "Audio"],
+  },
+  {
+    name: "BetterHelp",
+    desc: "World's largest online therapy platform with 30,000+ licensed therapists.",
+    url: "https://betterhelp.com",
+    icon: "support_agent",
+    badge: "Global",
+    badgeColor: "text-[#006b56] bg-[#75f9d3]/30",
+    color: "text-[#006b56]",
+    bg: "bg-[#75f9d3]/20",
+    tags: ["Global", "Specialised", "Flexible"],
+  },
+  {
+    name: "The Mindful Lab",
+    desc: "India-based therapists offering mindfulness-integrated therapy.",
+    url: "#",
+    icon: "self_improvement",
+    badge: "India",
+    badgeColor: "text-[#8a4c05] bg-[#ffdcc2]/40",
+    color: "text-[#8a4c05]",
+    bg: "bg-[#ffdcc2]/30",
+    tags: ["Mindfulness", "India", "Online"],
+  },
 ];
-const MODES = ["All Modes", "Online", "In-person"];
-const SPECIALIZATIONS = [
-  "All",
-  "Clinical Psychologist",
-  "Counselling Psychologist",
-  "Psychiatrist",
-  "Psychotherapist",
-  "Child Psychologist",
-  "Art Therapist",
+
+const SPECIALITIES = [
+  "Anxiety", "Depression", "Trauma / PTSD", "Relationships",
+  "Grief", "OCD", "ADHD", "Eating Disorders",
+  "Stress", "Bipolar", "Sleep Issues", "Self-esteem",
 ];
 
-function StarRating({ rating }) {
-  return (
-    <span className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <span
-          key={s}
-          className={`material-icons-round text-sm ${
-            s <= Math.round(rating) ? "text-[#F59E0B]" : "text-[#D9E2EC]"
-          }`}
-        >
-          star
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function TherapistCard({ t }) {
-  return (
-    <div
-      className="bg-white rounded-2xl border border-[#E8F4F8] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-      style={{ boxShadow: "0 2px 12px rgba(34,177,212,0.06)" }}
-    >
-      {/* Top accent */}
-      <div className="h-1.5 bg-gradient-to-r from-[#22B1D4] to-[#189AB4]" />
-
-      <div className="p-5">
-        {/* Header row */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className="relative flex-shrink-0">
-            <img
-              src={t.photo}
-              alt={t.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-[#E8F4F8]"
-            />
-            {t.available && (
-              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] rounded-full border-2 border-white" />
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-[#1F2933] font-serif text-base">
-              {t.name}
-            </h3>
-            <p className="text-xs text-[#52606D] mt-0.5">{t.specialization}</p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <StarRating rating={t.rating} />
-              <span className="text-xs text-[#9AA5B1]">
-                {t.rating} ({t.reviews})
-              </span>
-            </div>
-          </div>
-          <div className="flex-shrink-0 text-right">
-            <p className="text-sm font-bold text-[#22B1D4]">{t.fee}</p>
-          </div>
-        </div>
-
-        {/* Details */}
-        <div className="space-y-2 text-sm text-[#52606D] mb-4">
-          <div className="flex items-center gap-2">
-            <span className="material-icons-round text-[#22B1D4] text-base">
-              work_history
-            </span>
-            <span>{t.experience} experience</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="material-icons-round text-[#22B1D4] text-base">
-              location_on
-            </span>
-            <span>{t.city}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="material-icons-round text-[#22B1D4] text-base">
-              language
-            </span>
-            <span className="truncate">{t.languages.join(", ")}</span>
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {t.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs px-2.5 py-1 rounded-full bg-[#F0F9FC] text-[#22B1D4] font-medium"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Mode badges */}
-        <div className="flex gap-2 mb-4">
-          {t.mode.map((m) => (
-            <span
-              key={m}
-              className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium"
-              style={{
-                borderColor: m === "Online" ? "#22B1D4" : "#10B981",
-                color: m === "Online" ? "#22B1D4" : "#10B981",
-                background: m === "Online" ? "#F0F9FC" : "#F0FDF4",
-              }}
-            >
-              <span className="material-icons-round text-xs">
-                {m === "Online" ? "videocam" : "person"}
-              </span>
-              {m}
-            </span>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <button
-          disabled={!t.available}
-          className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            t.available
-              ? "bg-[#22B1D4] text-white hover:bg-[#189AB4] active:bg-[#137A8F]"
-              : "bg-[#F1F5F9] text-[#9AA5B1] cursor-not-allowed"
-          }`}
-          style={
-            t.available ? { boxShadow: "0 4px 12px rgba(34,177,212,0.22)" } : {}
-          }
-        >
-          {t.available ? "Book Appointment" : "Currently Unavailable"}
-        </button>
-      </div>
-    </div>
-  );
-}
+const CHECKLIST = [
+  { icon: "verified", text: "Check their credentials and license" },
+  { icon: "chat", text: "Offer a free consultation session" },
+  { icon: "translate", text: "Work in your preferred language" },
+  { icon: "calendar_month", text: "Have availability matching your schedule" },
+  { icon: "currency_rupee", text: "Fit within your budget" },
+  { icon: "psychology", text: "Specialise in your area of concern" },
+];
 
 export default function FindTherapist() {
-  const { therapists } = useFindHelp();
-  const [city, setCity] = useState("All Cities");
-  const [mode, setMode] = useState("All Modes");
-  const [spec, setSpec] = useState("All");
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    return therapists.filter((t) => {
-      if (city !== "All Cities" && t.city !== city) return false;
-      if (mode !== "All Modes" && !t.mode.includes(mode)) return false;
-      if (spec !== "All" && t.specialization !== spec) return false;
-      if (search && !t.name.toLowerCase().includes(search.toLowerCase()))
-        return false;
-      return true;
-    });
-  }, [therapists, city, mode, spec, search]);
-
-  const reset = () => {
-    setCity("All Cities");
-    setMode("All Modes");
-    setSpec("All");
-    setSearch("");
-  };
+  const [selectedSpeciality, setSelectedSpeciality] = useState(null);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
-
-      {/* Breadcrumb */}
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <nav className="flex items-center gap-1.5 text-sm text-[#9AA5B1]">
-          <Link to="/" className="hover:text-[#22B1D4] transition-colors">
-            Home
-          </Link>
-          <span className="material-icons-round text-sm">chevron_right</span>
-          <Link
-            to="/find-help"
-            className="hover:text-[#22B1D4] transition-colors"
-          >
-            Find Help
-          </Link>
-          <span className="material-icons-round text-sm">chevron_right</span>
-          <span className="text-[#1F2933] font-medium">Find a Therapist</span>
-        </nav>
-      </div>
-
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-6 pb-8">
-        <div
-          className="rounded-2xl p-8 md:p-12 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, #1F2933 0%, #334155 100%)",
-          }}
-        >
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-              <span className="material-icons-round text-sm">verified</span>
-              Verified Professionals
-            </div>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
-              Find a Therapist
-            </h1>
-            <p className="text-white/70 text-base md:text-lg max-w-xl">
-              Connect with licensed mental health professionals across India —
-              online or in-person.
-            </p>
-            <p className="text-[#22B1D4] font-semibold mt-2">
-              {therapists.length} professionals available
+    <AppLayout title="Find Professional Help" subtitle="Connect with certified mental health professionals">
+      <div className="space-y-6">
+        {/* Intro */}
+        <GlassCard className="p-6 flex flex-col md:flex-row gap-5 items-center">
+          <div className="w-16 h-16 rounded-full bg-[#5742d3]/10 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-3xl text-[#5742d3]">medical_services</span>
+          </div>
+          <div>
+            <h3 className="font-display text-xl font-bold text-[#111c2d] mb-1">
+              Professional help makes a real difference
+            </h3>
+            <p className="text-sm text-[#474554] leading-relaxed">
+              While Serene provides supportive AI companionship, a licensed therapist or psychiatrist
+              can offer diagnosis, treatment, and evidence-based care that AI cannot replace.
+              Here are trusted platforms to find qualified professionals.
             </p>
           </div>
-          <div className="absolute top-0 right-0 w-56 h-56 rounded-full bg-[#22B1D4]/10 -translate-y-1/3 translate-x-1/4 pointer-events-none" />
-          <div className="absolute bottom-0 right-24 w-32 h-32 rounded-full bg-white/5 translate-y-1/2 pointer-events-none" />
-        </div>
-      </div>
+        </GlassCard>
 
-      {/* Tab Nav */}
-      <div className="max-w-6xl mx-auto px-6 mb-6">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {[
-            {
-              label: "Helplines",
-              to: "/find-help/helplines",
-              active: false,
-              icon: "phone_in_talk",
-            },
-            {
-              label: "Find a Therapist",
-              to: "/find-help/therapist",
-              active: true,
-              icon: "person_search",
-            },
-            {
-              label: "Self-Help Techniques",
-              to: "/find-help/self-help",
-              active: false,
-              icon: "self_improvement",
-            },
-          ].map((tab) => (
-            <Link
-              key={tab.label}
-              to={tab.to}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                tab.active
-                  ? "bg-[#22B1D4] text-white shadow-md"
-                  : "bg-white text-[#52606D] border border-[#D9E2EC] hover:border-[#22B1D4] hover:text-[#22B1D4]"
-              }`}
-            >
-              <span className="material-icons-round text-base">{tab.icon}</span>
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="max-w-6xl mx-auto px-6 mb-8">
-        <div
-          className="bg-white rounded-2xl border border-[#E8F4F8] p-5"
-          style={{ boxShadow: "0 2px 12px rgba(34,177,212,0.06)" }}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Search */}
-            <div className="relative">
-              <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA5B1] text-lg">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Search by name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#D9E2EC] text-sm text-[#1F2933] placeholder-[#9AA5B1] focus:outline-none focus:ring-2 focus:ring-[#22B1D4]/30 focus:border-[#22B1D4] transition"
-              />
-            </div>
-
-            {/* City */}
-            <div className="relative">
-              <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA5B1] text-lg">
-                location_on
-              </span>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#D9E2EC] text-sm text-[#1F2933] bg-white focus:outline-none focus:ring-2 focus:ring-[#22B1D4]/30 focus:border-[#22B1D4] transition appearance-none"
+        {/* Speciality Filter */}
+        <div>
+          <h4 className="font-display text-base font-bold text-[#111c2d] mb-3">Filter by Speciality</h4>
+          <div className="flex flex-wrap gap-2">
+            {SPECIALITIES.map((s) => (
+              <button
+                key={s}
+                onClick={() => setSelectedSpeciality(selectedSpeciality === s ? null : s)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  selectedSpeciality === s
+                    ? "bg-[#5742d3] text-white shadow-md shadow-[#5742d3]/20"
+                    : "glass-card border border-white/30 text-[#474554] hover:border-[#5742d3]/30 hover:text-[#5742d3]"
+                }`}
               >
-                {CITIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Mode */}
-            <div className="relative">
-              <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA5B1] text-lg">
-                videocam
-              </span>
-              <select
-                value={mode}
-                onChange={(e) => setMode(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#D9E2EC] text-sm text-[#1F2933] bg-white focus:outline-none focus:ring-2 focus:ring-[#22B1D4]/30 focus:border-[#22B1D4] transition appearance-none"
-              >
-                {MODES.map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Specialization */}
-            <div className="relative">
-              <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA5B1] text-lg">
-                psychology
-              </span>
-              <select
-                value={spec}
-                onChange={(e) => setSpec(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#D9E2EC] text-sm text-[#1F2933] bg-white focus:outline-none focus:ring-2 focus:ring-[#22B1D4]/30 focus:border-[#22B1D4] transition appearance-none"
-              >
-                {SPECIALIZATIONS.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-[#9AA5B1]">
-              <span className="font-semibold text-[#1F2933]">
-                {filtered.length}
-              </span>{" "}
-              / {therapists.length} results
-            </p>
-            <button
-              onClick={reset}
-              className="flex items-center gap-1.5 text-sm text-[#52606D] hover:text-[#E03E3E] transition-colors font-medium"
-            >
-              <span className="material-icons-round text-base">
-                restart_alt
-              </span>
-              Reset Filters
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="max-w-6xl mx-auto px-6 pb-16">
-        {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <span className="material-icons-round text-5xl text-[#D9E2EC] mb-3 block">
-              person_search
-            </span>
-            <p className="text-[#9AA5B1] font-medium">
-              No therapists match your filters.
-            </p>
-            <button
-              onClick={reset}
-              className="mt-3 text-[#22B1D4] font-semibold hover:underline text-sm"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((t) => (
-              <TherapistCard key={t.id} t={t} />
+                {s}
+              </button>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* Platform Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {PLATFORMS.map((p) => (
+            <GlassCard key={p.name} className="p-5 flex flex-col gap-4 hover:scale-[1.01] transition-transform">
+              <div className="flex items-start justify-between">
+                <div className={`p-2.5 rounded-xl ${p.bg}`}>
+                  <span className={`material-symbols-outlined ${p.color}`}>{p.icon}</span>
+                </div>
+                <span className={`text-[10px] font-mono px-2 py-1 rounded-full ${p.badgeColor}`}>
+                  {p.badge}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-[#111c2d] text-sm mb-1">{p.name}</h4>
+                <p className="text-xs text-[#787586] leading-relaxed">{p.desc}</p>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {p.tags.map((t) => (
+                    <span key={t} className="text-[10px] font-mono bg-[#f0f3ff] text-[#5742d3] px-2 py-0.5 rounded-full">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#5742d3] text-white text-xs font-semibold hover:bg-[#4126bd] transition-colors shadow-lg shadow-[#5742d3]/15"
+              >
+                <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                Visit Platform
+              </a>
+            </GlassCard>
+          ))}
+        </div>
+
+        {/* What to Look For Checklist */}
+        <GlassCard className="p-6">
+          <h4 className="font-display text-lg font-bold text-[#111c2d] mb-4">What to look for in a therapist</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CHECKLIST.map((item) => (
+              <div key={item.text} className="flex items-center gap-3 p-3 rounded-xl bg-[#f0f3ff]">
+                <div className="w-8 h-8 rounded-full bg-[#5742d3]/10 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[#5742d3] text-[16px]">{item.icon}</span>
+                </div>
+                <span className="text-sm text-[#474554]">{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
       </div>
-    </div>
+    </AppLayout>
   );
 }

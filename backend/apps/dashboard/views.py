@@ -10,6 +10,7 @@ class DashboardView(APIView):
     GET /api/v1/dashboard/
     Returns aggregated data for the dashboard page.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -20,26 +21,31 @@ class DashboardView(APIView):
         # ── Imports (lazy to avoid circular imports) ───────────────────────────
         from apps.chat.models import Conversation, Message
         from apps.mood.models import MoodEntry
-        from apps.tests_app.all_in_one import TestResult, TestResultSerializer
+        from apps.tests_app.models import TestResult
+        from apps.tests_app.serializers import TestResultSerializer
 
         # Recent conversations (5)
-        conversations = Conversation.objects.filter(
-            user=user, is_active=True
-        ).prefetch_related('messages').order_by('-updated_at')[:5]
+        conversations = (
+            Conversation.objects.filter(user=user, is_active=True)
+            .prefetch_related("messages")
+            .order_by("-updated_at")[:5]
+        )
 
         conv_data = []
         for c in conversations:
             last = c.messages.last()
-            conv_data.append({
-                'id': c.id,
-                'title': c.title,
-                'updated_at': c.updated_at,
-                'last_message': last.content[:80] if last else '',
-            })
+            conv_data.append(
+                {
+                    "id": c.id,
+                    "title": c.title,
+                    "updated_at": c.updated_at,
+                    "last_message": last.content[:80] if last else "",
+                }
+            )
 
         # Weekly mood summary
         mood_entries = MoodEntry.objects.filter(user=user, logged_date__gte=week_ago)
-        mood_avg = mood_entries.aggregate(avg=Avg('mood_score'))['avg']
+        mood_avg = mood_entries.aggregate(avg=Avg("mood_score"))["avg"]
 
         # Latest test results
         latest_tests = {}
@@ -54,8 +60,7 @@ class DashboardView(APIView):
 
         # Streak calculation (consecutive days with mood entries)
         all_dates = set(
-            MoodEntry.objects.filter(user=user)
-            .values_list('logged_date', flat=True)
+            MoodEntry.objects.filter(user=user).values_list("logged_date", flat=True)
         )
         streak = 0
         check = today
@@ -63,31 +68,33 @@ class DashboardView(APIView):
             streak += 1
             check -= datetime.timedelta(days=1)
 
-        return Response({
-            'user': {
-                'display_name': user.display_name or user.username,
-                'chat_style': user.chat_style,
-                'track_daily_mood': user.track_daily_mood,
-                'streak_days': streak,
-            },
-            'weekly_stats': {
-                'sessions': weekly_sessions,
-                'mood_entries': mood_entries.count(),
-                'avg_mood_score': round(mood_avg, 1) if mood_avg else None,
-            },
-            'recent_conversations': conv_data,
-            'latest_tests': latest_tests,
-            'recent_moods': list(
-                MoodEntry.objects.filter(user=user)
-                .order_by('-logged_date')[:7]
-                .values('logged_date', 'mood_score', 'mood_label')
-            ),
-        })
+        return Response(
+            {
+                "user": {
+                    "display_name": user.display_name or user.username,
+                    "chat_style": user.chat_style,
+                    "track_daily_mood": user.track_daily_mood,
+                    "streak_days": streak,
+                },
+                "weekly_stats": {
+                    "sessions": weekly_sessions,
+                    "mood_entries": mood_entries.count(),
+                    "avg_mood_score": round(mood_avg, 1) if mood_avg else None,
+                },
+                "recent_conversations": conv_data,
+                "latest_tests": latest_tests,
+                "recent_moods": list(
+                    MoodEntry.objects.filter(user=user)
+                    .order_by("-logged_date")[:7]
+                    .values("logged_date", "mood_score", "mood_label")
+                ),
+            }
+        )
 
 
 # ── urls.py ────────────────────────────────────────────────────────────────────
 from django.urls import path
 
 urlpatterns = [
-    path('', DashboardView.as_view(), name='dashboard'),
+    path("", DashboardView.as_view(), name="dashboard"),
 ]

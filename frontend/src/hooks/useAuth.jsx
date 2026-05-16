@@ -1,3 +1,4 @@
+// src/hooks/useAuth.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../services/api";
 
@@ -40,13 +41,17 @@ export function AuthProvider({ children }) {
     if (data.access) {
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
-      setUser(data.user);
-      return data.user;
+      setUser(data.user || null);
+      return data.user || {};
     }
     throw data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const refresh = localStorage.getItem("refresh_token");
+    try {
+      if (refresh) await auth.logout(refresh);
+    } catch (_) {}
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     setUser(null);
