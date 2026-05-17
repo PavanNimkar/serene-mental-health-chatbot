@@ -12,7 +12,11 @@ const NAV_ITEMS = [
 
 const HELP_ITEMS = [
   { to: "/find-help/helplines", icon: "emergency", label: "Crisis Helplines" },
-  { to: "/find-help/therapist", icon: "medical_services", label: "Find Professional" },
+  {
+    to: "/find-help/therapist",
+    icon: "medical_services",
+    label: "Find Professional",
+  },
   { to: "/find-help/self-help", icon: "self_improvement", label: "Self-Help" },
 ];
 
@@ -29,38 +33,65 @@ export default function Sidebar({ open, onClose }) {
     <div className="flex flex-col h-full py-6 px-3 gap-1">
       {/* Brand */}
       <div className="px-3 mb-6">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="Serene" className="w-8 h-8 object-contain" />
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/logo.png"
+            alt="Serene"
+            className="w-8 h-8 object-contain"
+          />
           <div>
-            <h1 className="font-display text-xl font-bold text-[#5742d3] leading-none">Serene</h1>
-            <p className="text-[10px] text-[#787586] font-mono tracking-widest uppercase">AI Companion</p>
+            <h1
+              className="text-xl font-bold text-[#1F2933] leading-none"
+              style={{ fontFamily: "serif" }}
+            >
+              Serene
+            </h1>
+            <p className="text-[10px] text-[#9AA5B1] font-mono tracking-widest uppercase">
+              AI Companion
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Nav */}
       <div className="flex flex-col gap-0.5 flex-1">
-        <p className="text-[10px] font-mono tracking-widest uppercase text-[#787586] px-3 mb-1">Main</p>
+        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mb-1">
+          Main
+        </p>
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-[#5742d3] text-white shadow-lg shadow-[#5742d3]/25"
-                  : "text-[#474554] hover:bg-white/60 hover:text-[#5742d3] hover:translate-x-0.5"
+                  ? "bg-[#E8F8FC] text-[#22B1D4] font-semibold"
+                  : "text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] hover:translate-x-0.5"
               }`
             }
           >
-            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-            <span>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
+                >
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#22B1D4]" />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
 
         {/* Find Help */}
-        <p className="text-[10px] font-mono tracking-widest uppercase text-[#787586] px-3 mt-4 mb-1">Support</p>
+        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mt-4 mb-1">
+          Support
+        </p>
         {HELP_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -69,12 +100,14 @@ export default function Sidebar({ open, onClose }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-[#006b56]/10 text-[#006b56]"
-                  : "text-[#474554] hover:bg-white/60 hover:text-[#006b56] hover:translate-x-0.5"
+                  ? "bg-[#E8F8FC] text-[#22B1D4]"
+                  : "text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] hover:translate-x-0.5"
               }`
             }
           >
-            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+            <span className="material-symbols-outlined text-[20px]">
+              {item.icon}
+            </span>
             <span>{item.label}</span>
           </NavLink>
         ))}
@@ -82,18 +115,25 @@ export default function Sidebar({ open, onClose }) {
 
       {/* User + Logout */}
       <div className="mt-auto flex flex-col gap-2 px-1">
-        <div className="bg-[#5742d3]/5 rounded-xl p-3 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#5742d3] flex items-center justify-center text-white text-sm font-bold shrink-0">
+        <div className="bg-[#E8F8FC] rounded-xl p-3 flex items-center gap-3 border border-[#D4EEF7]">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+            style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
+          >
             {user?.username?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#111c2d] truncate">{user?.username || "User"}</p>
-            <p className="text-[11px] text-[#787586] truncate">{user?.email || ""}</p>
+            <p className="text-sm font-semibold text-[#1F2933] truncate">
+              {user?.username || "User"}
+            </p>
+            <p className="text-[11px] text-[#9AA5B1] truncate">
+              {user?.email || ""}
+            </p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#474554] hover:bg-red-50 hover:text-red-600 transition-all duration-200 w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#52606D] hover:bg-red-50 hover:text-red-500 transition-all duration-200 w-full"
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
           <span>Sign Out</span>
@@ -105,20 +145,18 @@ export default function Sidebar({ open, onClose }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col glass-sidebar w-64 fixed left-0 top-0 h-screen z-40 shadow-xl">
+      <aside className="hidden lg:flex flex-col bg-white border-r border-[#E4EEF3] w-64 fixed left-0 top-0 h-screen z-40 shadow-sm">
         <SidebarContent />
       </aside>
 
       {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             onClick={onClose}
           />
-          {/* Drawer */}
-          <aside className="absolute left-0 top-0 h-full w-72 glass-sidebar shadow-2xl border-r border-white/20 animate-[slideIn_0.25s_ease]">
+          <aside className="absolute left-0 top-0 h-full w-72 bg-white border-r border-[#E4EEF3] shadow-2xl animate-[slideIn_0.25s_ease]">
             <SidebarContent />
           </aside>
         </div>

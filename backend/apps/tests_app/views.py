@@ -2,7 +2,10 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import *
+
+from .data import ALL_QUESTIONS, ANSWER_OPTIONS, SCORING_FUNCTIONS, MAX_SCORES
+from .serializers import SubmitTestSerializer, TestResultSerializer
+from .models import TestResult
 
 
 class TestQuestionsView(APIView):
@@ -46,9 +49,8 @@ class SubmitTestView(APIView):
             interpretation=interpretation,
             answers=answers,
         )
-        return Response(
-            TestResultSerializer(result).data, status=status.HTTP_201_CREATED
-        )
+        # Return total_score so frontend (Tests.jsx + Dashboard.jsx) can read it
+        return Response(_serialize_result(result), status=status.HTTP_201_CREATED)
 
 
 class TestResultListView(generics.ListAPIView):
@@ -58,7 +60,7 @@ class TestResultListView(generics.ListAPIView):
     serializer_class = TestResultSerializer
 
     def get_queryset(self):
-        qs = TestResult.objects.filter(user=self.request.user)
+        qs = TestResult.objects.filter(user=self.request.user).order_by("-taken_at")
         test_type = self.request.query_params.get("type")
         if test_type:
             qs = qs.filter(test_type=test_type)
@@ -73,6 +75,23 @@ class LatestTestResultsView(APIView):
     def get(self, request):
         results = {}
         for t in TestResult.TestType:
-            result = TestResult.objects.filter(user=request.user, test_type=t).first()
-            results[t.value] = TestResultSerializer(result).data if result else None
+            result = (
+                TestResult.objects.filter(user=request.user, test_type=t)
+                .order_by("-taken_at")  # fixed: was -created_at
+                .first()
+            )
+            results[t.value] = _serialize_result(result) if result else None
         return Response(results)
+
+
+def _serialize_result(r):
+    """Consistent shape used by Tests.jsx and Dashboard.jsx — key is total_score."""
+    if r is None:
+        return None
+    return {
+        "total_score": r.score,  # frontend always reads .total_score
+        "interpretation": r.interpretation,
+        "severity": r.severity,
+        "test_type": r.test_type,
+        "taken_at": r.taken_at,
+    }

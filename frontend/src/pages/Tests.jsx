@@ -11,8 +11,8 @@ const TEST_TYPES = [
     full: "Patient Health Questionnaire",
     desc: "Screens for depression severity",
     icon: "psychology",
-    color: "text-[#5742d3]",
-    bg: "bg-[#e4dfff]/40",
+    color: "text-[#22B1D4]",
+    bg: "bg-[#E8F8FC]",
     questions: 9,
   },
   {
@@ -21,8 +21,8 @@ const TEST_TYPES = [
     full: "Generalized Anxiety Disorder",
     desc: "Assesses anxiety severity",
     icon: "monitor_heart",
-    color: "text-[#006b56]",
-    bg: "bg-[#75f9d3]/20",
+    color: "text-[#189AB4]",
+    bg: "bg-[#E8F8FC]",
     questions: 7,
   },
 ];
@@ -34,22 +34,27 @@ const ANSWER_OPTIONS = [
   { label: "Nearly every day", value: 3 },
 ];
 
-function SeverityBadge({ score, type }) {
-  let label = "";
-  let cls = "";
-  if (type === "PHQ-9") {
-    if (score <= 4) { label = "Minimal"; cls = "bg-[#75f9d3]/30 text-[#006b56]"; }
-    else if (score <= 9) { label = "Mild"; cls = "bg-[#e4dfff]/60 text-[#5742d3]"; }
-    else if (score <= 14) { label = "Moderate"; cls = "bg-[#ffdcc2]/50 text-[#8a4c05]"; }
-    else { label = "Severe"; cls = "bg-[#ffdad6]/60 text-[#ba1a1a]"; }
+function SeverityBadge({ score }) {
+  let label, cls;
+  if (score <= 4) {
+    label = "Minimal";
+    cls = "bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]";
+  } else if (score <= 9) {
+    label = "Mild";
+    cls = "bg-amber-50 text-amber-600 border border-amber-200";
+  } else if (score <= 14) {
+    label = "Moderate";
+    cls = "bg-orange-50 text-orange-600 border border-orange-200";
   } else {
-    if (score <= 4) { label = "Minimal"; cls = "bg-[#75f9d3]/30 text-[#006b56]"; }
-    else if (score <= 9) { label = "Mild"; cls = "bg-[#e4dfff]/60 text-[#5742d3]"; }
-    else if (score <= 14) { label = "Moderate"; cls = "bg-[#ffdcc2]/50 text-[#8a4c05]"; }
-    else { label = "Severe"; cls = "bg-[#ffdad6]/60 text-[#ba1a1a]"; }
+    label = "Severe";
+    cls = "bg-red-50 text-red-500 border border-red-200";
   }
   return (
-    <span className={`text-xs font-mono px-2.5 py-1 rounded-full font-semibold ${cls}`}>{label}</span>
+    <span
+      className={`text-xs font-mono px-2.5 py-1 rounded-full font-semibold ${cls}`}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -107,7 +112,10 @@ export default function Tests() {
   const progress = answers.filter((a) => a !== null).length;
 
   return (
-    <AppLayout title="Mental Health Tests" subtitle="Clinically validated self-assessments">
+    <AppLayout
+      title="Mental Health Tests"
+      subtitle="Clinically validated self-assessments"
+    >
       {!activeTest ? (
         <div className="space-y-5">
           {/* Test cards */}
@@ -117,30 +125,48 @@ export default function Tests() {
               return (
                 <GlassCard key={t.id} className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`p-2.5 rounded-xl ${t.bg}`}>
-                      <span className={`material-symbols-outlined ${t.color}`}>{t.icon}</span>
+                    <div
+                      className={`p-2.5 rounded-xl ${t.bg} border border-[#D4EEF7]`}
+                    >
+                      <span className={`material-symbols-outlined ${t.color}`}>
+                        {t.icon}
+                      </span>
                     </div>
-                    {lr && <SeverityBadge score={lr.total_score} type={t.id} />}
+                    {lr && <SeverityBadge score={lr.total_score} />}
                   </div>
-                  <h3 className="font-display text-xl font-bold text-[#111c2d]">{t.name}</h3>
-                  <p className="text-xs text-[#787586] mb-1">{t.full}</p>
-                  <p className="text-sm text-[#474554] mb-4">{t.desc}</p>
+                  <h3
+                    className="text-xl font-bold text-[#1F2933]"
+                    style={{ fontFamily: "serif" }}
+                  >
+                    {t.name}
+                  </h3>
+                  <p className="text-xs text-[#9AA5B1] mb-1">{t.full}</p>
+                  <p className="text-sm text-[#52606D] mb-4">{t.desc}</p>
                   {lr && (
-                    <div className="mb-4 p-3 bg-[#f0f3ff] rounded-xl">
+                    <div className="mb-4 p-3 bg-[#F8FAFC] rounded-xl border border-[#E4EEF3]">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-[#787586]">Last score:</span>
-                        <span className="font-mono font-bold text-[#111c2d] text-lg">{lr.total_score}</span>
+                        <span className="text-xs text-[#9AA5B1]">
+                          Last score:
+                        </span>
+                        <span className="font-mono font-bold text-[#1F2933] text-lg">
+                          {lr.total_score}
+                        </span>
                       </div>
-                      <p className="text-xs text-[#787586] mt-0.5">{lr.interpretation}</p>
+                      <p className="text-xs text-[#9AA5B1] mt-0.5">
+                        {lr.interpretation}
+                      </p>
                     </div>
                   )}
                   <button
                     onClick={() => startTest(t.id)}
-                    className="w-full py-3 rounded-xl bg-[#5742d3] text-white text-sm font-semibold hover:bg-[#4126bd] transition-colors shadow-lg shadow-[#5742d3]/15"
+                    className="w-full py-3 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-all shadow-[0_4px_12px_rgba(34,177,212,.3)]"
+                    style={{
+                      background: "linear-gradient(135deg,#22B1D4,#189AB4)",
+                    }}
                   >
                     {lr ? "Retake Assessment" : "Take Assessment"}
                   </button>
-                  <p className="text-center text-[10px] text-[#c8c4d7] mt-2 font-mono">
+                  <p className="text-center text-[10px] text-[#9AA5B1] mt-2 font-mono">
                     {t.questions} questions · ~2 minutes
                   </p>
                 </GlassCard>
@@ -149,12 +175,15 @@ export default function Tests() {
           </div>
 
           {/* Disclaimer */}
-          <GlassCard className="p-5 border border-[#e4dfff] bg-[#f0f3ff]/50">
+          <GlassCard className="p-5 border border-[#D4EEF7] bg-[#E8F8FC]/50">
             <div className="flex gap-3">
-              <span className="material-symbols-outlined text-[#5742d3] shrink-0">info</span>
-              <p className="text-sm text-[#474554] leading-relaxed">
-                These assessments are for educational purposes only and do not constitute a clinical diagnosis.
-                Always consult a qualified mental health professional for diagnosis and treatment.
+              <span className="material-symbols-outlined text-[#22B1D4] shrink-0">
+                info
+              </span>
+              <p className="text-sm text-[#52606D] leading-relaxed">
+                These assessments are for educational purposes only and do not
+                constitute a clinical diagnosis. Always consult a qualified
+                mental health professional for diagnosis and treatment.
               </p>
             </div>
           </GlassCard>
@@ -163,22 +192,37 @@ export default function Tests() {
         /* Result View */
         <div className="max-w-xl mx-auto">
           <GlassCard className="p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-[#5742d3]/10 flex items-center justify-center mx-auto mb-4">
-              <span className="font-mono text-3xl font-bold text-[#5742d3]">{result.total_score}</span>
+            <div className="w-20 h-20 rounded-full bg-[#E8F8FC] flex items-center justify-center mx-auto mb-4 border border-[#D4EEF7]">
+              <span className="font-mono text-3xl font-bold text-[#22B1D4]">
+                {result.total_score}
+              </span>
             </div>
-            <h3 className="font-display text-2xl font-bold text-[#111c2d] mb-1">{activeTest} Complete</h3>
-            <SeverityBadge score={result.total_score} type={activeTest} />
-            <p className="text-[#474554] text-sm mt-4 mb-6 leading-relaxed">{result.interpretation}</p>
+            <h3
+              className="text-2xl font-bold text-[#1F2933] mb-2"
+              style={{ fontFamily: "serif" }}
+            >
+              {activeTest} Complete
+            </h3>
+            <SeverityBadge score={result.total_score} />
+            <p className="text-[#52606D] text-sm mt-4 mb-6 leading-relaxed">
+              {result.interpretation}
+            </p>
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => { setActiveTest(null); setResult(null); }}
-                className="w-full py-3 rounded-xl bg-[#5742d3] text-white font-semibold text-sm hover:bg-[#4126bd] transition-colors"
+                onClick={() => {
+                  setActiveTest(null);
+                  setResult(null);
+                }}
+                className="w-full py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-colors shadow-[0_4px_12px_rgba(34,177,212,.3)]"
+                style={{
+                  background: "linear-gradient(135deg,#22B1D4,#189AB4)",
+                }}
               >
                 Back to Tests
               </button>
               <a
                 href="/find-help/therapist"
-                className="w-full py-3 rounded-xl glass-card border border-white/30 text-[#5742d3] font-semibold text-sm hover:bg-white/80 transition-colors"
+                className="w-full py-3 rounded-xl bg-white border border-[#D4EEF7] text-[#22B1D4] font-semibold text-sm hover:bg-[#E8F8FC] transition-colors text-center"
               >
                 Find Professional Help
               </a>
@@ -190,28 +234,39 @@ export default function Tests() {
         <div className="max-w-2xl mx-auto space-y-5">
           {/* Progress */}
           <GlassCard className="p-4">
-            <div className="flex justify-between text-xs font-mono text-[#787586] mb-2">
+            <div className="flex justify-between text-xs font-mono text-[#9AA5B1] mb-2">
               <span>{activeTest} Assessment</span>
-              <span>{progress}/{questions.length}</span>
+              <span>
+                {progress}/{questions.length}
+              </span>
             </div>
-            <div className="h-1.5 bg-[#e7eeff] rounded-full overflow-hidden">
+            <div className="h-1.5 bg-[#E8F8FC] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#5742d3] rounded-full transition-all duration-300"
-                style={{ width: `${(progress / questions.length) * 100}%` }}
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${(progress / questions.length) * 100}%`,
+                  background: "linear-gradient(90deg,#22B1D4,#189AB4)",
+                }}
               />
             </div>
           </GlassCard>
 
           {loading ? (
             <div className="flex justify-center py-12">
-              <img src="/logo.png" className="w-10 animate-pulse" alt="Loading" />
+              <img
+                src="/logo.png"
+                className="w-10 animate-pulse"
+                alt="Loading"
+              />
             </div>
           ) : (
             <div className="space-y-4">
               {questions.map((q, i) => (
                 <GlassCard key={i} className="p-5">
-                  <p className="text-sm font-semibold text-[#111c2d] mb-4">
-                    <span className="font-mono text-[#5742d3] mr-2">{i + 1}.</span>
+                  <p className="text-sm font-semibold text-[#1F2933] mb-4">
+                    <span className="font-mono text-[#22B1D4] mr-2">
+                      {i + 1}.
+                    </span>
                     {q.text || q.question || q}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
@@ -221,9 +276,17 @@ export default function Tests() {
                         onClick={() => setAnswer(i, opt.value)}
                         className={`text-xs py-2.5 px-3 rounded-xl border transition-all ${
                           answers[i] === opt.value
-                            ? "bg-[#5742d3] text-white border-[#5742d3] shadow-md shadow-[#5742d3]/15"
-                            : "glass-card border-white/20 text-[#474554] hover:bg-white/80"
+                            ? "text-white border-[#22B1D4] shadow-[0_2px_8px_rgba(34,177,212,.3)]"
+                            : "bg-white border-[#E4EEF3] text-[#52606D] hover:bg-[#E8F8FC] hover:border-[#D4EEF7]"
                         }`}
+                        style={
+                          answers[i] === opt.value
+                            ? {
+                                background:
+                                  "linear-gradient(135deg,#22B1D4,#189AB4)",
+                              }
+                            : {}
+                        }
                       >
                         {opt.label}
                       </button>
@@ -237,14 +300,15 @@ export default function Tests() {
           <div className="flex gap-3">
             <button
               onClick={() => setActiveTest(null)}
-              className="px-5 py-3 rounded-xl glass-card border border-white/30 text-[#474554] text-sm font-medium hover:bg-white/80 transition-colors"
+              className="px-5 py-3 rounded-xl bg-white border border-[#E4EEF3] text-[#52606D] text-sm font-medium hover:bg-[#F8FAFC] hover:border-[#D4EEF7] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={submit}
               disabled={submitting || progress < questions.length}
-              className="flex-1 py-3 rounded-xl bg-[#5742d3] text-white text-sm font-semibold hover:bg-[#4126bd] transition-colors shadow-lg shadow-[#5742d3]/15 disabled:opacity-40"
+              className="flex-1 py-3 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-all shadow-[0_4px_12px_rgba(34,177,212,.3)] disabled:opacity-40"
+              style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
             >
               {submitting ? "Submitting…" : "Submit Assessment"}
             </button>

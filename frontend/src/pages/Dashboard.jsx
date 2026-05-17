@@ -21,19 +21,40 @@ function getGreeting() {
   return "Good evening";
 }
 
-function StatCard({ icon, iconBg, iconColor, label, value, badge, badgeColor }) {
+function StatCard({
+  icon,
+  iconBg,
+  iconColor,
+  label,
+  value,
+  badge,
+  badgeColor,
+}) {
   return (
     <GlassCard className="p-5 hover:scale-[1.02] transition-transform duration-200">
       <div className="flex items-center justify-between mb-3">
         <span className={`p-2 rounded-xl ${iconBg}`}>
-          <span className={`material-symbols-outlined text-[20px] ${iconColor}`}>{icon}</span>
+          <span
+            className={`material-symbols-outlined text-[20px] ${iconColor}`}
+          >
+            {icon}
+          </span>
         </span>
         {badge && (
-          <span className={`text-xs font-mono ${badgeColor || "text-[#787586]"}`}>{badge}</span>
+          <span
+            className={`text-xs font-mono ${badgeColor || "text-[#9AA5B1]"}`}
+          >
+            {badge}
+          </span>
         )}
       </div>
-      <p className="text-xs text-[#787586] mb-0.5">{label}</p>
-      <h3 className="text-2xl font-bold text-[#111c2d] font-display">{value}</h3>
+      <p className="text-xs text-[#9AA5B1] mb-0.5">{label}</p>
+      <h3
+        className="text-2xl font-bold text-[#1F2933]"
+        style={{ fontFamily: "serif" }}
+      >
+        {value}
+      </h3>
     </GlassCard>
   );
 }
@@ -41,9 +62,11 @@ function StatCard({ icon, iconBg, iconColor, label, value, badge, badgeColor }) 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-card px-3 py-2 rounded-xl text-xs">
-        <p className="text-[#787586]">{label}</p>
-        <p className="font-mono font-bold text-[#5742d3]">Score: {payload[0].value}</p>
+      <div className="bg-white border border-[#E4EEF3] shadow-lg px-3 py-2 rounded-xl text-xs">
+        <p className="text-[#9AA5B1]">{label}</p>
+        <p className="font-mono font-bold text-[#22B1D4]">
+          Score: {payload[0].value}
+        </p>
       </div>
     );
   }
@@ -80,7 +103,9 @@ export default function Dashboard() {
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
             <img src="/logo.png" alt="Serene" className="w-10 animate-pulse" />
-            <p className="text-xs text-[#787586] font-mono">Loading your sanctuary…</p>
+            <p className="text-xs text-[#9AA5B1] font-mono">
+              Loading your sanctuary…
+            </p>
           </div>
         </div>
       ) : (
@@ -89,33 +114,33 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
               icon="bolt"
-              iconBg="bg-[#5742d3]/10"
-              iconColor="text-[#5742d3]"
+              iconBg="bg-[#E8F8FC]"
+              iconColor="text-[#22B1D4]"
               label="Streak"
               value={`${stats.streak || 0} Days`}
               badge="+1 today"
-              badgeColor="text-[#006b56]"
+              badgeColor="text-[#10B981]"
             />
             <StatCard
               icon="forum"
-              iconBg="bg-[#006b56]/10"
-              iconColor="text-[#006b56]"
+              iconBg="bg-[#E8F8FC]"
+              iconColor="text-[#22B1D4]"
               label="Sessions"
               value={stats.total_conversations || 0}
               badge="Last: today"
             />
             <StatCard
               icon="sentiment_satisfied"
-              iconBg="bg-[#8a4c05]/10"
-              iconColor="text-[#8a4c05]"
+              iconBg="bg-[#E8F8FC]"
+              iconColor="text-[#189AB4]"
               label="Avg Mood"
               value={stats.avg_mood || "—"}
               badge="7-day avg"
             />
             <StatCard
               icon="history_edu"
-              iconBg="bg-[#787586]/10"
-              iconColor="text-[#787586]"
+              iconBg="bg-[#F8FAFC]"
+              iconColor="text-[#9AA5B1]"
               label="Mood Entries"
               value={stats.total_mood_entries || 0}
             />
@@ -126,14 +151,24 @@ export default function Dashboard() {
             {/* Recent Conversations */}
             <GlassCard className="lg:col-span-5 p-6">
               <div className="flex justify-between items-center mb-5">
-                <h4 className="font-display text-lg font-bold text-[#111c2d]">Recent Sessions</h4>
-                <Link to="/chat" className="text-[#5742d3] text-xs font-mono hover:underline">
+                <h4
+                  className="text-lg font-bold text-[#1F2933]"
+                  style={{ fontFamily: "serif" }}
+                >
+                  Recent Sessions
+                </h4>
+                <Link
+                  to="/chat"
+                  className="text-[#22B1D4] text-xs font-mono hover:underline"
+                >
                   New Chat →
                 </Link>
               </div>
               {conversations.length === 0 ? (
-                <div className="text-center py-8 text-[#787586] text-sm">
-                  <span className="material-symbols-outlined text-3xl mb-2 block">chat_bubble_outline</span>
+                <div className="text-center py-8 text-[#9AA5B1] text-sm">
+                  <span className="material-symbols-outlined text-3xl mb-2 block">
+                    chat_bubble_outline
+                  </span>
                   No conversations yet. Start chatting!
                 </div>
               ) : (
@@ -142,23 +177,28 @@ export default function Dashboard() {
                     <Link
                       key={c.id}
                       to="/chat"
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/50 transition-colors border border-transparent hover:border-white/40 group"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#E8F8FC] transition-colors border border-transparent hover:border-[#D4EEF7] group"
                     >
-                      <div className="w-9 h-9 rounded-full bg-[#5742d3]/10 flex items-center justify-center text-[#5742d3] shrink-0">
-                        <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      <div className="w-9 h-9 rounded-full bg-[#E8F8FC] flex items-center justify-center text-[#22B1D4] shrink-0 border border-[#D4EEF7]">
+                        <span
+                          className="material-symbols-outlined text-[18px]"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
                           smart_toy
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline">
-                          <span className="text-sm font-semibold text-[#111c2d] truncate">
+                          <span className="text-sm font-semibold text-[#1F2933] truncate">
                             {c.title || `Session ${c.id}`}
                           </span>
-                          <span className="text-[10px] text-[#787586] font-mono shrink-0 ml-2">
-                            {new Date(c.updated_at || c.created_at).toLocaleDateString()}
+                          <span className="text-[10px] text-[#9AA5B1] font-mono shrink-0 ml-2">
+                            {new Date(
+                              c.updated_at || c.created_at,
+                            ).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-xs text-[#787586] truncate mt-0.5">
+                        <p className="text-xs text-[#9AA5B1] truncate mt-0.5">
                           {c.last_message || "Continue where you left off…"}
                         </p>
                       </div>
@@ -168,9 +208,14 @@ export default function Dashboard() {
               )}
               <Link
                 to="/chat"
-                className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5742d3] text-white text-sm font-semibold hover:bg-[#4126bd] transition-colors shadow-lg shadow-[#5742d3]/20"
+                className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-colors shadow-[0_4px_12px_rgba(34,177,212,.3)]"
+                style={{
+                  background: "linear-gradient(135deg,#22B1D4,#189AB4)",
+                }}
               >
-                <span className="material-symbols-outlined text-[18px]">add</span>
+                <span className="material-symbols-outlined text-[18px]">
+                  add
+                </span>
                 New Conversation
               </Link>
             </GlassCard>
@@ -179,33 +224,66 @@ export default function Dashboard() {
             <GlassCard className="lg:col-span-7 p-6 flex flex-col">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4 className="font-display text-lg font-bold text-[#111c2d]">Mood This Week</h4>
-                  <p className="text-xs text-[#787586] mt-0.5">Your emotional landscape over 7 days</p>
+                  <h4
+                    className="text-lg font-bold text-[#1F2933]"
+                    style={{ fontFamily: "serif" }}
+                  >
+                    Mood This Week
+                  </h4>
+                  <p className="text-xs text-[#9AA5B1] mt-0.5">
+                    Your emotional landscape over 7 days
+                  </p>
                 </div>
-                <Link to="/mood" className="text-[#5742d3] text-xs font-mono hover:underline">
+                <Link
+                  to="/mood"
+                  className="text-[#22B1D4] text-xs font-mono hover:underline"
+                >
                   Log Today →
                 </Link>
               </div>
               {moodGraph.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-center text-[#787586] text-sm py-8">
+                <div className="flex-1 flex items-center justify-center text-center text-[#9AA5B1] text-sm py-8">
                   <div>
-                    <span className="material-symbols-outlined text-3xl mb-2 block">show_chart</span>
+                    <span className="material-symbols-outlined text-3xl mb-2 block">
+                      show_chart
+                    </span>
                     Start logging moods to see your chart
                   </div>
                 </div>
               ) : (
                 <div className="flex-1 min-h-[160px]">
                   <ResponsiveContainer width="100%" height={180}>
-                    <AreaChart data={moodGraph} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart
+                      data={moodGraph}
+                      margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                    >
                       <defs>
-                        <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#5742d3" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#5742d3" stopOpacity={0} />
+                        <linearGradient
+                          id="moodGrad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#22B1D4"
+                            stopOpacity={0.2}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#22B1D4"
+                            stopOpacity={0}
+                          />
                         </linearGradient>
                       </defs>
                       <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 10, fill: "#787586", fontFamily: "JetBrains Mono" }}
+                        tick={{
+                          fontSize: 10,
+                          fill: "#9AA5B1",
+                          fontFamily: "JetBrains Mono",
+                        }}
                         tickLine={false}
                         axisLine={false}
                       />
@@ -214,11 +292,11 @@ export default function Dashboard() {
                       <Area
                         type="monotone"
                         dataKey="score"
-                        stroke="#5742d3"
+                        stroke="#22B1D4"
                         strokeWidth={2}
                         fill="url(#moodGrad)"
-                        dot={{ fill: "#5742d3", strokeWidth: 0, r: 4 }}
-                        activeDot={{ r: 6, fill: "#5742d3" }}
+                        dot={{ fill: "#22B1D4", strokeWidth: 0, r: 4 }}
+                        activeDot={{ r: 6, fill: "#22B1D4" }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -233,26 +311,35 @@ export default function Dashboard() {
             <GlassCard className="p-5">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h5 className="font-semibold text-[#111c2d] text-sm">PHQ-9 Depression</h5>
-                  <p className="text-xs text-[#787586]">Latest result</p>
+                  <h5 className="font-semibold text-[#1F2933] text-sm">
+                    PHQ-9 Depression
+                  </h5>
+                  <p className="text-xs text-[#9AA5B1]">Latest result</p>
                 </div>
-                <span className="p-1.5 rounded-lg bg-[#5742d3]/10">
-                  <span className="material-symbols-outlined text-[#5742d3] text-[18px]">psychology</span>
+                <span className="p-1.5 rounded-lg bg-[#E8F8FC] border border-[#D4EEF7]">
+                  <span className="material-symbols-outlined text-[#22B1D4] text-[18px]">
+                    psychology
+                  </span>
                 </span>
               </div>
               {latestTests["PHQ-9"] ? (
                 <div>
-                  <p className="text-2xl font-bold font-display text-[#111c2d]">
+                  <p
+                    className="text-2xl font-bold text-[#1F2933]"
+                    style={{ fontFamily: "serif" }}
+                  >
                     {latestTests["PHQ-9"].total_score}
                   </p>
-                  <p className="text-xs text-[#787586] mt-1">{latestTests["PHQ-9"].interpretation}</p>
+                  <p className="text-xs text-[#9AA5B1] mt-1">
+                    {latestTests["PHQ-9"].interpretation}
+                  </p>
                 </div>
               ) : (
-                <p className="text-sm text-[#787586]">Not taken yet</p>
+                <p className="text-sm text-[#9AA5B1]">Not taken yet</p>
               )}
               <Link
                 to="/tests"
-                className="mt-3 flex items-center gap-1 text-xs text-[#5742d3] hover:underline font-mono"
+                className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono"
               >
                 Take assessment →
               </Link>
@@ -262,26 +349,35 @@ export default function Dashboard() {
             <GlassCard className="p-5">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h5 className="font-semibold text-[#111c2d] text-sm">GAD-7 Anxiety</h5>
-                  <p className="text-xs text-[#787586]">Latest result</p>
+                  <h5 className="font-semibold text-[#1F2933] text-sm">
+                    GAD-7 Anxiety
+                  </h5>
+                  <p className="text-xs text-[#9AA5B1]">Latest result</p>
                 </div>
-                <span className="p-1.5 rounded-lg bg-[#006b56]/10">
-                  <span className="material-symbols-outlined text-[#006b56] text-[18px]">monitor_heart</span>
+                <span className="p-1.5 rounded-lg bg-[#E8F8FC] border border-[#D4EEF7]">
+                  <span className="material-symbols-outlined text-[#189AB4] text-[18px]">
+                    monitor_heart
+                  </span>
                 </span>
               </div>
               {latestTests["GAD-7"] ? (
                 <div>
-                  <p className="text-2xl font-bold font-display text-[#111c2d]">
+                  <p
+                    className="text-2xl font-bold text-[#1F2933]"
+                    style={{ fontFamily: "serif" }}
+                  >
                     {latestTests["GAD-7"].total_score}
                   </p>
-                  <p className="text-xs text-[#787586] mt-1">{latestTests["GAD-7"].interpretation}</p>
+                  <p className="text-xs text-[#9AA5B1] mt-1">
+                    {latestTests["GAD-7"].interpretation}
+                  </p>
                 </div>
               ) : (
-                <p className="text-sm text-[#787586]">Not taken yet</p>
+                <p className="text-sm text-[#9AA5B1]">Not taken yet</p>
               )}
               <Link
                 to="/tests"
-                className="mt-3 flex items-center gap-1 text-xs text-[#006b56] hover:underline font-mono"
+                className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono"
               >
                 Take assessment →
               </Link>
@@ -289,32 +385,40 @@ export default function Dashboard() {
 
             {/* Quick Actions */}
             <GlassCard className="p-5">
-              <h5 className="font-semibold text-[#111c2d] text-sm mb-3">Quick Actions</h5>
+              <h5 className="font-semibold text-[#1F2933] text-sm mb-3">
+                Quick Actions
+              </h5>
               <div className="space-y-2">
                 <Link
                   to="/mood"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/60 transition-colors text-sm text-[#474554] group"
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D] group"
                 >
-                  <span className="p-1.5 rounded-lg bg-[#8a4c05]/10 text-[#8a4c05]">
-                    <span className="material-symbols-outlined text-[16px]">wb_sunny</span>
+                  <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
+                    <span className="material-symbols-outlined text-[16px]">
+                      wb_sunny
+                    </span>
                   </span>
                   Log today's mood
                 </Link>
                 <Link
                   to="/chat"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/60 transition-colors text-sm text-[#474554]"
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]"
                 >
-                  <span className="p-1.5 rounded-lg bg-[#5742d3]/10 text-[#5742d3]">
-                    <span className="material-symbols-outlined text-[16px]">forum</span>
+                  <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
+                    <span className="material-symbols-outlined text-[16px]">
+                      forum
+                    </span>
                   </span>
                   Start a session
                 </Link>
                 <Link
                   to="/find-help/helplines"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm text-[#474554]"
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm text-[#52606D]"
                 >
-                  <span className="p-1.5 rounded-lg bg-red-100 text-red-600">
-                    <span className="material-symbols-outlined text-[16px]">emergency</span>
+                  <span className="p-1.5 rounded-lg bg-red-50 text-red-500 border border-red-100">
+                    <span className="material-symbols-outlined text-[16px]">
+                      emergency
+                    </span>
                   </span>
                   Crisis helplines
                 </Link>

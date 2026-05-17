@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Mood from "./pages/Mood";
 import Tests from "./pages/Tests";
 import Profile from "./pages/Profile";
-import OnboardingFlow from "./pages/Onboarding/OnboardingFlow";
 import Helplines from "./pages/FindHelp/Helplines";
 import FindTherapist from "./pages/FindHelp/FindTherapist";
 import SelfHelpTechniques from "./pages/FindHelp/SelfHelpTechniques";
@@ -22,7 +21,9 @@ function ProtectedRoute({ children }) {
       <div className="min-h-screen flex items-center justify-center bg-[#f9f9ff]">
         <div className="flex flex-col items-center gap-3">
           <img src="/logo.png" alt="serene" className="w-12 animate-pulse" />
-          <p className="text-sm text-[#787586] font-mono tracking-widest">Loading…</p>
+          <p className="text-sm text-[#787586] font-mono tracking-widest">
+            Loading…
+          </p>
         </div>
       </div>
     );
@@ -51,30 +52,57 @@ function AppRoutes() {
         }
       />
 
-      {/* Onboarding — single multi-step page */}
+      {/* Protected App Pages */}
       <Route
-        path="/onboarding/:step"
+        path="/chat"
         element={
           <ProtectedRoute>
-            <OnboardingFlow />
+            <Chat />
           </ProtectedRoute>
         }
       />
-      {/* Legacy step routes redirect to unified flow */}
-      <Route path="/onboarding/1" element={<Navigate to="/onboarding/1" replace />} />
-      <Route path="/onboarding/2" element={<Navigate to="/onboarding/2" replace />} />
-      <Route path="/onboarding/3" element={<Navigate to="/onboarding/3" replace />} />
-      <Route path="/onboarding/4" element={<Navigate to="/onboarding/4" replace />} />
-
-      {/* Protected App Pages */}
-      <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/mood" element={<ProtectedRoute><Mood /></ProtectedRoute>} />
-      <Route path="/tests" element={<ProtectedRoute><Tests /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mood"
+        element={
+          <ProtectedRoute>
+            <Mood />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tests"
+        element={
+          <ProtectedRoute>
+            <Tests />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Find Help — accessible without auth */}
-      <Route path="/find-help/helplines" element={<Helplines />} />
+      <Route
+        path="/find-help/helplines"
+        element={
+          <ProtectedRoute>
+            <Helplines />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/find-help/therapist" element={<FindTherapist />} />
       <Route path="/find-help/self-help" element={<SelfHelpTechniques />} />
 

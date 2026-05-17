@@ -3,7 +3,15 @@ import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import GlassCard from "../../components/GlassCard";
 
-const CATEGORIES = ["All", "Breathing", "Mindfulness", "CBT", "Movement", "Sleep", "Journaling"];
+const CATEGORIES = [
+  "All",
+  "Breathing",
+  "Mindfulness",
+  "CBT",
+  "Movement",
+  "Sleep",
+  "Journaling",
+];
 
 const TECHNIQUES = [
   {
@@ -11,8 +19,8 @@ const TECHNIQUES = [
     category: "Breathing",
     duration: "4 min",
     icon: "air",
-    color: "text-[#5742d3]",
-    bg: "bg-[#e4dfff]/40",
+    color: "text-[#22B1D4]",
+    bg: "bg-[#E8F8FC]/60",
     desc: "A powerful technique used by Navy SEALs to manage stress. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4.",
     steps: [
       "Find a comfortable seated position and close your eyes",
@@ -29,8 +37,8 @@ const TECHNIQUES = [
     category: "Mindfulness",
     duration: "5 min",
     icon: "anchor",
-    color: "text-[#006b56]",
-    bg: "bg-[#75f9d3]/20",
+    color: "text-[#189AB4]",
+    bg: "bg-[#E8F8FC]/40",
     desc: "A sensory grounding technique that brings you into the present moment instantly — perfect for panic attacks or overwhelming anxiety.",
     steps: [
       "Name 5 things you can see around you",
@@ -47,8 +55,8 @@ const TECHNIQUES = [
     category: "CBT",
     duration: "10 min",
     icon: "psychology",
-    color: "text-[#5742d3]",
-    bg: "bg-[#e4dfff]/40",
+    color: "text-[#22B1D4]",
+    bg: "bg-[#E8F8FC]/60",
     desc: "Challenge and reframe negative thought patterns. Identify the thought, examine the evidence, and create a balanced alternative.",
     steps: [
       "Write down the negative automatic thought",
@@ -83,8 +91,8 @@ const TECHNIQUES = [
     category: "Journaling",
     duration: "5 min",
     icon: "edit_note",
-    color: "text-[#006b56]",
-    bg: "bg-[#75f9d3]/20",
+    color: "text-[#189AB4]",
+    bg: "bg-[#E8F8FC]/40",
     desc: "Research shows writing 3 specific things you're grateful for daily rewires the brain toward positivity within 3 weeks.",
     steps: [
       "Set a consistent time each day (morning or night works best)",
@@ -101,8 +109,8 @@ const TECHNIQUES = [
     category: "Sleep",
     duration: "Nightly",
     icon: "bedtime",
-    color: "text-[#5742d3]",
-    bg: "bg-[#e4dfff]/40",
+    color: "text-[#22B1D4]",
+    bg: "bg-[#E8F8FC]/60",
     desc: "A structured evening routine that signals your brain it's time to wind down, improving both sleep quality and duration.",
     steps: [
       "Set a fixed sleep and wake time — even on weekends",
@@ -137,8 +145,8 @@ const TECHNIQUES = [
     category: "CBT",
     duration: "15 min",
     icon: "thermometer",
-    color: "text-[#006b56]",
-    bg: "bg-[#75f9d3]/20",
+    color: "text-[#189AB4]",
+    bg: "bg-[#E8F8FC]/40",
     desc: "A DBT skill for rapidly reducing intense emotional distress using Temperature, Intense exercise, Paced breathing, and Paired muscle relaxation.",
     steps: [
       "Temperature: Splash cold water on your face or hold an ice cube",
@@ -155,8 +163,8 @@ const TECHNIQUES = [
     category: "Mindfulness",
     duration: "10 min",
     icon: "favorite",
-    color: "text-[#5742d3]",
-    bg: "bg-[#e4dfff]/40",
+    color: "text-[#22B1D4]",
+    bg: "bg-[#E8F8FC]/60",
     desc: "Cultivate compassion for yourself and others. Shown to reduce self-criticism, loneliness, and depressive symptoms.",
     steps: [
       "Sit comfortably, close your eyes, take 3 deep breaths",
@@ -172,37 +180,50 @@ const TECHNIQUES = [
 
 function TechniqueCard({ t, onSelect }) {
   return (
-    <GlassCard
-      className="p-5 flex flex-col gap-3 cursor-pointer hover:scale-[1.01] transition-transform duration-200"
+    <div
+      className="bg-white border border-[#E4EEF3] rounded-2xl p-5 flex flex-col gap-3 cursor-pointer hover:scale-[1.01] hover:shadow-[0_4px_16px_rgba(34,177,212,.12)] hover:border-[#D4EEF7] transition-all duration-200"
       onClick={() => onSelect(t)}
     >
       <div className="flex items-start justify-between">
         <div className={`p-2.5 rounded-xl ${t.bg}`}>
-          <span className={`material-symbols-outlined ${t.color}`}>{t.icon}</span>
+          <span className={`material-symbols-outlined ${t.color}`}>
+            {t.icon}
+          </span>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="text-[10px] font-mono bg-[#f0f3ff] text-[#5742d3] px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-mono bg-[#E8F8FC] text-[#22B1D4] px-2 py-0.5 rounded-full">
             {t.category}
           </span>
-          <span className="text-[10px] text-[#787586] font-mono">{t.duration}</span>
+          <span className="text-[10px] text-[#9AA5B1] font-mono">
+            {t.duration}
+          </span>
         </div>
       </div>
       <div>
-        <h4 className="font-semibold text-[#111c2d] text-sm mb-1">{t.title}</h4>
-        <p className="text-xs text-[#787586] leading-relaxed line-clamp-2">{t.desc}</p>
+        <h4 className="font-semibold text-[#1F2933] text-sm mb-1">{t.title}</h4>
+        <p className="text-xs text-[#9AA5B1] leading-relaxed line-clamp-2">
+          {t.desc}
+        </p>
       </div>
       <div className="flex flex-wrap gap-1.5 mt-auto">
         {t.tags.map((tag) => (
-          <span key={tag} className="text-[10px] font-mono bg-[#e7eeff] text-[#5742d3] px-2 py-0.5 rounded-full">
+          <span
+            key={tag}
+            className="text-[10px] font-mono bg-[#E8F8FC] text-[#22B1D4] px-2 py-0.5 rounded-full"
+          >
             {tag}
           </span>
         ))}
       </div>
-      <button className={`flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-semibold transition-all ${t.bg} ${t.color} hover:opacity-80`}>
-        <span className="material-symbols-outlined text-[15px]">play_arrow</span>
+      <button
+        className={`flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-semibold transition-all ${t.bg} ${t.color} hover:opacity-80`}
+      >
+        <span className="material-symbols-outlined text-[15px]">
+          play_arrow
+        </span>
         Start Technique
       </button>
-    </GlassCard>
+    </div>
   );
 }
 
@@ -212,61 +233,98 @@ function TechniqueModal({ technique, onClose }) {
   const done = step >= technique.steps.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
-        className="glass-card rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-white/40 relative"
+        className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-[#E4EEF3] relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-[#787586] hover:text-[#111c2d]">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-[#9AA5B1] hover:text-[#1F2933]"
+        >
           <span className="material-symbols-outlined">close</span>
         </button>
 
-        <div className={`w-12 h-12 rounded-2xl ${technique.bg} flex items-center justify-center mb-4`}>
-          <span className={`material-symbols-outlined text-2xl ${technique.color}`}>{technique.icon}</span>
+        <div
+          className={`w-12 h-12 rounded-2xl ${technique.bg} flex items-center justify-center mb-4`}
+        >
+          <span
+            className={`material-symbols-outlined text-2xl ${technique.color}`}
+          >
+            {technique.icon}
+          </span>
         </div>
 
-        <h3 className="font-display text-xl font-bold text-[#111c2d] mb-1">{technique.title}</h3>
-        <p className="text-xs text-[#787586] font-mono mb-4">{technique.duration} · {technique.category}</p>
+        <h3 className="font-display text-xl font-bold text-[#1F2933] mb-1">
+          {technique.title}
+        </h3>
+        <p className="text-xs text-[#9AA5B1] font-mono mb-4">
+          {technique.duration} · {technique.category}
+        </p>
 
         {/* Progress */}
-        <div className="h-1 bg-[#e7eeff] rounded-full mb-5 overflow-hidden">
+        <div className="h-1 bg-[#E8F8FC] rounded-full mb-5 overflow-hidden">
           <div
-            className="h-full bg-[#5742d3] rounded-full transition-all duration-500"
-            style={{ width: `${done ? 100 : (step / technique.steps.length) * 100}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${done ? 100 : (step / technique.steps.length) * 100}%`,
+              background: "linear-gradient(135deg, #22B1D4, #189AB4)",
+            }}
           />
         </div>
 
         {done ? (
           <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-full bg-[#75f9d3]/30 flex items-center justify-center mx-auto mb-3">
-              <span className="material-symbols-outlined text-3xl text-[#006b56]">check_circle</span>
+            <div className="w-16 h-16 rounded-full bg-[#E8F8FC] flex items-center justify-center mx-auto mb-3">
+              <span className="material-symbols-outlined text-3xl text-[#189AB4]">
+                check_circle
+              </span>
             </div>
-            <h4 className="font-display text-lg font-bold text-[#111c2d] mb-1">Well done!</h4>
-            <p className="text-[#787586] text-sm">You completed {technique.title}. Take a moment to notice how you feel.</p>
-            <button onClick={onClose} className="mt-4 bg-[#5742d3] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#4126bd] transition-colors">
+            <h4 className="font-display text-lg font-bold text-[#1F2933] mb-1">
+              Well done!
+            </h4>
+            <p className="text-[#9AA5B1] text-sm">
+              You completed {technique.title}. Take a moment to notice how you
+              feel.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-4 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              style={{
+                background: "linear-gradient(135deg, #22B1D4, #189AB4)",
+              }}
+            >
               Close
             </button>
           </div>
         ) : (
           <>
             <div className="mb-5">
-              <p className="text-[10px] font-mono text-[#787586] mb-2 uppercase tracking-widest">
+              <p className="text-[10px] font-mono text-[#9AA5B1] mb-2 uppercase tracking-widest">
                 Step {step + 1} of {technique.steps.length}
               </p>
-              <p className="text-[#111c2d] text-sm leading-relaxed">{technique.steps[step]}</p>
+              <p className="text-[#1F2933] text-sm leading-relaxed">
+                {technique.steps[step]}
+              </p>
             </div>
             <div className="flex gap-3">
               {step > 0 && (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="px-4 py-2.5 rounded-xl glass-card border border-white/30 text-[#474554] text-sm"
+                  className="px-4 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E4EEF3] text-[#52606D] text-sm"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={() => setStep(step + 1)}
-                className="flex-1 py-2.5 rounded-xl bg-[#5742d3] text-white text-sm font-semibold hover:bg-[#4126bd] transition-colors"
+                className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
+                style={{
+                  background: "linear-gradient(135deg, #22B1D4, #189AB4)",
+                }}
               >
                 {step === technique.steps.length - 1 ? "Complete" : "Next Step"}
               </button>
@@ -282,26 +340,35 @@ export default function SelfHelpTechniques() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedTechnique, setSelectedTechnique] = useState(null);
 
-  const filtered = activeCategory === "All"
-    ? TECHNIQUES
-    : TECHNIQUES.filter((t) => t.category === activeCategory);
+  const filtered =
+    activeCategory === "All"
+      ? TECHNIQUES
+      : TECHNIQUES.filter((t) => t.category === activeCategory);
 
   return (
-    <AppLayout title="Self-Help Techniques" subtitle="Evidence-based tools you can use right now">
+    <AppLayout
+      title="Self-Help Techniques"
+      subtitle="Evidence-based tools you can use right now"
+    >
       <div className="space-y-5">
         {/* Intro Banner */}
-        <GlassCard className="p-5 flex gap-4 items-center border border-[#e4dfff]">
-          <div className="w-12 h-12 rounded-full bg-[#5742d3]/10 flex items-center justify-center shrink-0 animate-breathe">
-            <span className="material-symbols-outlined text-2xl text-[#5742d3]">self_improvement</span>
+        <div className="bg-white border border-[#D4EEF7] rounded-2xl p-5 flex gap-4 items-center">
+          <div className="w-12 h-12 rounded-full bg-[#E8F8FC] flex items-center justify-center shrink-0 animate-breathe">
+            <span className="material-symbols-outlined text-2xl text-[#22B1D4]">
+              self_improvement
+            </span>
           </div>
           <div>
-            <h3 className="font-display text-base font-bold text-[#111c2d]">Science-backed techniques</h3>
-            <p className="text-sm text-[#787586] leading-relaxed">
-              All techniques here are drawn from CBT, DBT, mindfulness research, and clinical psychology.
-              Click any card to follow a guided step-by-step session.
+            <h3 className="font-display text-base font-bold text-[#1F2933]">
+              Science-backed techniques
+            </h3>
+            <p className="text-sm text-[#9AA5B1] leading-relaxed">
+              All techniques here are drawn from CBT, DBT, mindfulness research,
+              and clinical psychology. Click any card to follow a guided
+              step-by-step session.
             </p>
           </div>
-        </GlassCard>
+        </div>
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2">
@@ -311,9 +378,14 @@ export default function SelfHelpTechniques() {
               onClick={() => setActiveCategory(cat)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-medium transition-all ${
                 activeCategory === cat
-                  ? "bg-[#5742d3] text-white shadow-md shadow-[#5742d3]/20"
-                  : "glass-card border border-white/30 text-[#474554] hover:text-[#5742d3] hover:border-[#5742d3]/30"
+                  ? "text-white shadow-md shadow-[#22B1D4]/20"
+                  : "bg-white border border-[#E4EEF3] text-[#52606D] hover:text-[#22B1D4] hover:border-[#D4EEF7]"
               }`}
+              style={
+                activeCategory === cat
+                  ? { background: "linear-gradient(135deg, #22B1D4, #189AB4)" }
+                  : {}
+              }
             >
               {cat}
             </button>
@@ -323,23 +395,33 @@ export default function SelfHelpTechniques() {
         {/* Technique Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((t) => (
-            <TechniqueCard key={t.title} t={t} onSelect={setSelectedTechnique} />
+            <TechniqueCard
+              key={t.title}
+              t={t}
+              onSelect={setSelectedTechnique}
+            />
           ))}
         </div>
 
         {/* Disclaimer */}
-        <GlassCard className="p-4 flex gap-3">
-          <span className="material-symbols-outlined text-[#5742d3] shrink-0">info</span>
-          <p className="text-xs text-[#787586] leading-relaxed">
-            These techniques are educational and complementary — they are not a replacement for professional
-            mental health treatment. If you are in crisis, please visit the Crisis Helplines page.
+        <div className="bg-white border border-[#E4EEF3] rounded-2xl p-4 flex gap-3">
+          <span className="material-symbols-outlined text-[#22B1D4] shrink-0">
+            info
+          </span>
+          <p className="text-xs text-[#9AA5B1] leading-relaxed">
+            These techniques are educational and complementary — they are not a
+            replacement for professional mental health treatment. If you are in
+            crisis, please visit the Crisis Helplines page.
           </p>
-        </GlassCard>
+        </div>
       </div>
 
       {/* Modal */}
       {selectedTechnique && (
-        <TechniqueModal technique={selectedTechnique} onClose={() => setSelectedTechnique(null)} />
+        <TechniqueModal
+          technique={selectedTechnique}
+          onClose={() => setSelectedTechnique(null)}
+        />
       )}
     </AppLayout>
   );

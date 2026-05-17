@@ -102,6 +102,9 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loadingConvs, setLoadingConvs] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const [renaming, setRenaming] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
   const messagesEndRef = useRef(null);
 
   const displayName = user?.first_name || user?.username || "there";
@@ -117,6 +120,13 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const close = () => setMenuOpen(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
 
   const loadConversation = async (id) => {
     try {
@@ -187,6 +197,39 @@ export default function Chat() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRename = async (id) => {
+    if (!renameValue.trim()) {
+      setRenaming(null);
+      return;
+    }
+    try {
+      await chatApi.rename(id, renameValue.trim());
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === id ? { ...c, title: renameValue.trim() } : c,
+        ),
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRenaming(null);
+      setMenuOpen(null);
+      setRenameValue("");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await chatApi.delete(id);
+      setConversations((prev) => prev.filter((c) => c.id !== id));
+      if (activeConvId === id) startNewChat();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMenuOpen(null);
     }
   };
 
@@ -310,17 +353,86 @@ export default function Chat() {
                   Recent
                 </p>
                 {conversations.map((c) => (
-                  <button
+                  <div
                     key={c.id}
-                    onClick={() => loadConversation(c.id)}
-                    className={`w-full text-left px-[10px] py-[6px] rounded-[8px] text-[12.5px] font-medium truncate transition-colors ${
+                    className={`relative group flex items-center rounded-[8px] transition-colors mb-0.5 ${
                       activeConvId === c.id
-                        ? "bg-[#E8F8FC] text-[#22B1D4] font-bold"
+                        ? "bg-[#E8F8FC] text-[#22B1D4]"
                         : "text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4]"
                     }`}
                   >
-                    {c.title || "Untitled chat"}
-                  </button>
+                    {renaming === c.id ? (
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleRename(c.id);
+                          if (e.key === "Escape") {
+                            setRenaming(null);
+                            setMenuOpen(null);
+                          }
+                        }}
+                        onBlur={() => handleRename(c.id)}
+                        className="flex-1 mx-2 my-1 px-2 py-1 text-[12.5px] rounded-md border border-[#22B1D4] outline-none text-[#1F2933] bg-white"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => loadConversation(c.id)}
+                        className="flex-1 text-left px-[10px] py-[6px] text-[12.5px] font-medium truncate"
+                      >
+                        {c.title || "Untitled chat"}
+                      </button>
+                    )}
+
+                    {/* Three-dot menu trigger */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(menuOpen === c.id ? null : c.id);
+                      }}
+                      className={`shrink-0 mr-1 w-6 h-6 rounded flex items-center justify-center text-[#9AA5B1] hover:text-[#22B1D4] transition-opacity ${
+                        menuOpen === c.id
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-100"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">
+                        more_horiz
+                      </span>
+                    </button>
+
+                    {/* Dropdown */}
+                    {menuOpen === c.id && (
+                      <div
+                        className="absolute right-0 top-8 z-50 bg-white border border-[#E4EEF3] rounded-xl shadow-lg overflow-hidden w-36"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => {
+                            setRenaming(c.id);
+                            setRenameValue(c.title || "");
+                            setMenuOpen(null);
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            edit
+                          </span>
+                          Rename
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c.id)}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            delete
+                          </span>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </>
             )}
@@ -502,7 +614,6 @@ export default function Chat() {
           {/* ── CHAT VIEW ── */}
           {view === "chat" && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Messages area */}
               <div className="flex-1 overflow-y-auto px-6 py-7 flex flex-col gap-[18px] msg-scroll">
                 <div className="flex justify-center">
                   <span className="bg-white border border-[#E4EEF3] rounded-full px-4 py-1 text-[11px] font-semibold text-[#9AA5B1]">
@@ -534,7 +645,6 @@ export default function Chat() {
 
               {/* Input area */}
               <div className="px-5 pb-4 pt-[10px] bg-white border-t border-[#E4EEF3] shrink-0">
-                {/* Quick chips */}
                 <div className="flex gap-2 overflow-x-auto no-sb pb-[10px]">
                   {QUICK_CHIPS.map((p) => (
                     <button
@@ -547,7 +657,6 @@ export default function Chat() {
                   ))}
                 </div>
 
-                {/* Textarea */}
                 <div className="flex items-end bg-[#F8FAFC] border-[1.5px] border-[#E4EEF3] rounded-2xl overflow-hidden focus-within:border-[#22B1D4] focus-within:shadow-[0_0_0_3px_rgba(34,177,212,.1)] transition-all">
                   <textarea
                     value={message}

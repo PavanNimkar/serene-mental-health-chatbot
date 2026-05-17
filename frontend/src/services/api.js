@@ -1,4 +1,3 @@
-// src/services/api.js
 const BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api/v1";
 
 const getToken = () => localStorage.getItem("access_token");
@@ -14,7 +13,6 @@ async function request(url, options = {}) {
     ...options,
   });
   if (res.status === 401) {
-    // Try to refresh
     const refresh = localStorage.getItem("refresh_token");
     if (refresh) {
       const r = await fetch(`${BASE}/auth/token/refresh/`, {
@@ -25,7 +23,6 @@ async function request(url, options = {}) {
       if (r.ok) {
         const data = await r.json();
         localStorage.setItem("access_token", data.access);
-        // Retry original request
         const retry = await fetch(`${BASE}${url}`, {
           headers: authHeaders(),
           ...options,
@@ -42,6 +39,8 @@ async function request(url, options = {}) {
     const err = await res.json().catch(() => ({}));
     throw err;
   }
+  // 204 No Content — don't parse body
+  if (res.status === 204) return null;
   return res.json();
 }
 
@@ -82,7 +81,13 @@ export const auth = {
 export const chat = {
   list: () => request("/chat/conversations/"),
   detail: (id) => request(`/chat/conversations/${id}/`),
-  delete: (id) => request(`/chat/conversations/${id}/`, { method: "DELETE" }),
+  rename: (id, title) =>
+    request(`/chat/conversations/${id}/rename/`, {
+      method: "PATCH",
+      body: JSON.stringify({ title }),
+    }),
+  delete: (id) =>
+    request(`/chat/conversations/${id}/rename/`, { method: "DELETE" }),
   send: (data) =>
     request("/chat/send/", { method: "POST", body: JSON.stringify(data) }),
 };
@@ -93,7 +98,10 @@ export const mood = {
   create: (data) =>
     request("/mood/entries/", { method: "POST", body: JSON.stringify(data) }),
   update: (id, data) =>
-    request(`/mood/entries/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+    request(`/mood/entries/${id}/`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   graph: (days = 30) => request(`/mood/graph/?days=${days}`),
 };
 

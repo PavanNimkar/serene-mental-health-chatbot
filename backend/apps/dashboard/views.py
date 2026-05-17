@@ -18,13 +18,11 @@ class DashboardView(APIView):
         today = datetime.date.today()
         week_ago = today - datetime.timedelta(days=7)
 
-        # ── Imports (lazy to avoid circular imports) ───────────────────────────
-        from apps.chat.models import Conversation, Message
+        from apps.chat.models import Conversation
         from apps.mood.models import MoodEntry
         from apps.tests_app.models import TestResult
-        from apps.tests_app.serializers import TestResultSerializer
 
-        # Recent conversations (5)
+        # ── Recent conversations ───────────────────────────────────────────────
         conversations = (
             Conversation.objects.filter(user=user, is_active=True)
             .prefetch_related("messages")
@@ -33,68 +31,65 @@ class DashboardView(APIView):
 
         conv_data = []
         for c in conversations:
-            last = c.messages.last()
+            last = c.messages.order_by("created_at").last()
             conv_data.append(
                 {
                     "id": c.id,
                     "title": c.title,
                     "updated_at": c.updated_at,
+                    "created_at": c.created_at,
                     "last_message": last.content[:80] if last else "",
                 }
             )
 
-        # Weekly mood summary
+        # ── Mood ───────────────────────────────────────────────────────────────
         mood_entries = MoodEntry.objects.filter(user=user, logged_date__gte=week_ago)
-        mood_avg = mood_entries.aggregate(avg=Avg("mood_score"))["avg"]
+        all_mood = MoodEntry.objects.filter(user=user)
+        mood_avg = all_mood.aggregate(avg=Avg("mood_score"))["avg"]
 
-        # Latest test results
-        latest_tests = {}
-        for t in TestResult.TestType:
-            r = TestResult.objects.filter(user=user, test_type=t).first()
-            latest_tests[t.value] = TestResultSerializer(r).data if r else None
-
-        # Weekly stats
-        weekly_sessions = Conversation.objects.filter(
-            user=user, created_at__date__gte=week_ago
-        ).count()
-
-        # Streak calculation (consecutive days with mood entries)
-        all_dates = set(
-            MoodEntry.objects.filter(user=user).values_list("logged_date", flat=True)
-        )
+        # ── Streak (consecutive days with a mood entry ending today) ──────────
+        all_dates = set(all_mood.values_list("logged_date", flat=True))
         streak = 0
         check = today
         while check in all_dates:
             streak += 1
             check -= datetime.timedelta(days=1)
 
+        # ── Total sessions ────────────────────────────────────────────────────
+        total_conversations = Conversation.objects.filter(user=user).count()
+
+        # ── Latest test results — shaped for Dashboard.jsx ────────────────────
+        # Dashboard reads: latestTests["PHQ-9"].total_score / .interpretation
+        # TestResult model stores: score / interpretation
+        latest_tests = {}
+        for t in TestResult.TestType:
+            r = (
+                TestResult.objects.filter(user=user, test_type=t)
+                .order_by("-taken_at")
+                .first()
+            )
+            if r:
+                latest_tests[t.value] = {
+                    "total_score": r.score,
+                    "interpretation": r.interpretation,
+                    "severity": r.severity,
+                    "taken_at": r.taken_at,  # was r.created_at
+                }
+            else:
+                latest_tests[t.value] = None
+
         return Response(
             {
-                "user": {
-                    "display_name": user.display_name or user.username,
-                    "chat_style": user.chat_style,
-                    "track_daily_mood": user.track_daily_mood,
-                    "streak_days": streak,
+                # Dashboard.jsx reads: data.stats.*
+                "stats": {
+                    "streak": streak,
+                    "total_conversations": total_conversations,
+                    "avg_mood": round(mood_avg, 1) if mood_avg else None,
+                    "total_mood_entries": all_mood.count(),
                 },
-                "weekly_stats": {
-                    "sessions": weekly_sessions,
-                    "mood_entries": mood_entries.count(),
-                    "avg_mood_score": round(mood_avg, 1) if mood_avg else None,
-                },
+                # Dashboard.jsx reads: data.recent_conversations
                 "recent_conversations": conv_data,
+                # Dashboard.jsx reads: data.latest_tests["PHQ-9"] / ["GAD-7"]
                 "latest_tests": latest_tests,
-                "recent_moods": list(
-                    MoodEntry.objects.filter(user=user)
-                    .order_by("-logged_date")[:7]
-                    .values("logged_date", "mood_score", "mood_label")
-                ),
             }
         )
-
-
-# ── urls.py ────────────────────────────────────────────────────────────────────
-from django.urls import path
-
-urlpatterns = [
-    path("", DashboardView.as_view(), name="dashboard"),
-]

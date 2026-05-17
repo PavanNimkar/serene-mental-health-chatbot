@@ -1,13 +1,3 @@
-"""
-apps/chat/views.py
-──────────────────
-CHANGES FROM ORIGINAL:
-  Line 1 change: import from ai_engine instead of model_service
-  Line 2 change: pass user=user to generate_response (enables memory + RAG)
-
-Everything else is identical to your original views.py.
-"""
-
 import logging
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -21,16 +11,12 @@ from .serializers import (
     ConversationListSerializer,
     SendMessageSerializer,
 )
-
-# ── CHANGE 1: import from ai_engine instead of model_service ─────────────────
 from .ai_engine import generate_response
 
 logger = logging.getLogger("apps.chat")
 
 
 class ConversationListView(generics.ListAPIView):
-    """GET /api/v1/chat/conversations/"""
-
     permission_classes = [IsAuthenticated]
     serializer_class = ConversationListSerializer
 
@@ -43,8 +29,6 @@ class ConversationListView(generics.ListAPIView):
 
 
 class ConversationDetailView(generics.RetrieveDestroyAPIView):
-    """GET/DELETE /api/v1/chat/conversations/<id>/"""
-
     permission_classes = [IsAuthenticated]
     serializer_class = ConversationSerializer
 
@@ -52,13 +36,30 @@ class ConversationDetailView(generics.RetrieveDestroyAPIView):
         return Conversation.objects.filter(user=self.request.user)
 
 
-class SendMessageView(APIView):
-    """
-    POST /api/v1/chat/send/
-    Body: { "content": "...", "conversation_id": null | <int> }
-    Creates conversation if conversation_id is null.
+class ConversationUpdateView(APIView):
+    """PATCH /api/v1/chat/conversations/<id>/rename/  — rename
+    DELETE /api/v1/chat/conversations/<id>/        — soft delete (is_active=False)
     """
 
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
+        title = request.data.get("title", "").strip()
+        if not title:
+            return Response({"error": "Title cannot be empty."}, status=400)
+        conversation.title = title
+        conversation.save(update_fields=["title"])
+        return Response({"id": conversation.id, "title": conversation.title})
+
+    def delete(self, request, pk):
+        conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
+        conversation.is_active = False
+        conversation.save(update_fields=["is_active"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -69,21 +70,18 @@ class SendMessageView(APIView):
         content = serializer.validated_data["content"]
         conv_id = serializer.validated_data.get("conversation_id")
 
-        # Get or create conversation
         if conv_id:
             conversation = get_object_or_404(Conversation, id=conv_id, user=user)
         else:
             title = content[:60] + ("…" if len(content) > 60 else "")
             conversation = Conversation.objects.create(user=user, title=title)
 
-        # Persist user message
         Message.objects.create(
             conversation=conversation,
             role=Message.Role.USER,
             content=content,
         )
 
-        # Build history for LLM (last 20 messages for context window)
         history = list(
             conversation.messages.order_by("created_at").values("role", "content")
         )[-20:]
@@ -93,17 +91,14 @@ class SendMessageView(APIView):
             "chat_style": user.chat_style,
         }
 
-        # ── CHANGE 2: pass user=user so memory + RAG can query the DB ────────
         ai_text = generate_response(history, user_profile, user=user)
 
-        # Persist assistant message
         ai_msg = Message.objects.create(
             conversation=conversation,
             role=Message.Role.ASSISTANT,
             content=ai_text,
         )
 
-        # Update conversation timestamp
         conversation.save(update_fields=["updated_at"])
 
         return Response(
