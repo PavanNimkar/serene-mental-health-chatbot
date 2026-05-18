@@ -31,23 +31,6 @@ export default function AppLayout({ children, title, subtitle }) {
                   {title}
                 </h2>
               )}
-              {subtitle && <p className="text-xs text-[#9AA5B1]">{subtitle}</p>}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-xl text-[#52606D] hover:bg-[#E8F8FC] hover:text-[#22B1D4] transition-colors relative">
-              <span className="material-symbols-outlined text-[22px]">
-                notifications
-              </span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22B1D4]" />
-            </button>
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold cursor-pointer shadow-[0_3px_12px_rgba(34,177,212,.3)]"
-              style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                person
-              </span>
             </div>
           </div>
         </header>

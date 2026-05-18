@@ -86,12 +86,6 @@ export default function Home() {
           <a href="#how" className="hover:text-[#22B1D4] transition-colors">
             How it Works
           </a>
-          <Link
-            to="/find-help/helplines"
-            className="hover:text-[#22B1D4] transition-colors"
-          >
-            Crisis Help
-          </Link>
         </div>
         <div className="flex items-center gap-3">
           <Link

@@ -46,9 +46,6 @@ export default function Sidebar({ open, onClose }) {
             >
               Serene
             </h1>
-            <p className="text-[10px] text-[#9AA5B1] font-mono tracking-widest uppercase">
-              AI Companion
-            </p>
           </div>
         </div>
       </div>

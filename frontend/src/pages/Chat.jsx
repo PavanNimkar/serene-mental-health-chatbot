@@ -481,30 +481,7 @@ export default function Chat() {
                   <span className="material-symbols-outlined">menu</span>
                 </button>
               )}
-              <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E4EEF3] rounded-full px-3 py-[5px]">
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{
-                    background: "linear-gradient(135deg,#22B1D4,#189AB4)",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined text-white text-[13px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    smart_toy
-                  </span>
-                </div>
-                <span className="text-[13px] font-bold text-[#1F2933]">
-                  Serene AI
-                </span>
-                <div className="flex items-center gap-1 ml-1">
-                  <div className="w-[6px] h-[6px] rounded-full bg-[#10B981] animate-pulse" />
-                  <span className="text-[10px] text-[#10B981] font-mono tracking-wider">
-                    ONLINE
-                  </span>
-                </div>
-              </div>
+              <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E4EEF3] rounded-full px-3 py-[5px]"></div>
             </div>
             <button
               onClick={startNewChat}
