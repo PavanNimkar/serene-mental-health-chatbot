@@ -39,7 +39,6 @@ async function request(url, options = {}) {
     const err = await res.json().catch(() => ({}));
     throw err;
   }
-  // 204 No Content — don't parse body
   if (res.status === 204) return null;
   return res.json();
 }
@@ -118,4 +117,54 @@ export const tests = {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const dashboard = {
   get: () => request("/dashboard/"),
+};
+
+// ── Journal ───────────────────────────────────────────────────────────────────
+export const journal = {
+  list: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.tag) q.set("tag", params.tag);
+    if (params.since) q.set("since", params.since);
+    if (params.until) q.set("until", params.until);
+    if (params.q) q.set("q", params.q);
+    const qs = q.toString();
+    return request(`/journal/entries/${qs ? "?" + qs : ""}`);
+  },
+  get: (id) => request(`/journal/entries/${id}/`),
+  create: (data) =>
+    request("/journal/entries/", { method: "POST", body: JSON.stringify(data) }),
+  update: (id, data) =>
+    request(`/journal/entries/${id}/`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  delete: (id) => request(`/journal/entries/${id}/`, { method: "DELETE" }),
+  prompts: (category) =>
+    request(`/journal/prompts/${category ? "?category=" + category : ""}`),
+  randomPrompt: () => request("/journal/prompts/random/"),
+  stats: () => request("/journal/stats/"),
+};
+
+// ── Goals ─────────────────────────────────────────────────────────────────────
+export const goals = {
+  list: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.status) q.set("status", params.status);
+    if (params.category) q.set("category", params.category);
+    const qs = q.toString();
+    return request(`/goals/${qs ? "?" + qs : ""}`);
+  },
+  get: (id) => request(`/goals/${id}/`),
+  create: (data) =>
+    request("/goals/", { method: "POST", body: JSON.stringify(data) }),
+  update: (id, data) =>
+    request(`/goals/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  delete: (id) => request(`/goals/${id}/`, { method: "DELETE" }),
+  addMilestone: (goalId, data) =>
+    request(`/goals/${goalId}/milestones/`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  completeMilestone: (goalId, mid) =>
+    request(`/goals/${goalId}/milestones/${mid}/complete/`, { method: "PATCH" }),
 };

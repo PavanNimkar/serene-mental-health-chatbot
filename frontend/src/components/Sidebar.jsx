@@ -6,17 +6,15 @@ const NAV_ITEMS = [
   { to: "/dashboard", icon: "dashboard", label: "Dashboard" },
   { to: "/chat", icon: "forum", label: "AI Chat" },
   { to: "/mood", icon: "wb_sunny", label: "Mood Tracker" },
+  { to: "/journal", icon: "menu_book", label: "Journal" },
+  { to: "/goals", icon: "flag", label: "Goals" },
   { to: "/tests", icon: "quiz", label: "Mental Health Tests" },
   { to: "/profile", icon: "person", label: "Profile" },
 ];
 
 const HELP_ITEMS = [
   { to: "/find-help/helplines", icon: "emergency", label: "Crisis Helplines" },
-  {
-    to: "/find-help/therapist",
-    icon: "medical_services",
-    label: "Find Professional",
-  },
+  { to: "/find-help/therapist", icon: "medical_services", label: "Find Professional" },
   { to: "/find-help/self-help", icon: "self_improvement", label: "Self-Help" },
 ];
 
@@ -34,16 +32,9 @@ export default function Sidebar({ open, onClose }) {
       {/* Brand */}
       <div className="px-3 mb-6">
         <div className="flex items-center gap-2.5">
-          <img
-            src="/logo.png"
-            alt="Serene"
-            className="w-8 h-8 object-contain"
-          />
+          <img src="/logo.png" alt="Serene" className="w-8 h-8 object-contain" />
           <div>
-            <h1
-              className="text-xl font-bold text-[#1F2933] leading-none"
-              style={{ fontFamily: "serif" }}
-            >
+            <h1 className="text-xl font-bold text-[#1F2933] leading-none" style={{ fontFamily: "serif" }}>
               Serene
             </h1>
           </div>
@@ -51,10 +42,8 @@ export default function Sidebar({ open, onClose }) {
       </div>
 
       {/* Main Nav */}
-      <div className="flex flex-col gap-0.5 flex-1">
-        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mb-1">
-          Main
-        </p>
+      <div className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
+        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mb-1">Main</p>
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -77,18 +66,14 @@ export default function Sidebar({ open, onClose }) {
                   {item.icon}
                 </span>
                 <span>{item.label}</span>
-                {isActive && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#22B1D4]" />
-                )}
+                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#22B1D4]" />}
               </>
             )}
           </NavLink>
         ))}
 
-        {/* Find Help */}
-        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mt-4 mb-1">
-          Support
-        </p>
+        {/* Support */}
+        <p className="text-[10px] font-mono tracking-widest uppercase text-[#9AA5B1] px-3 mt-4 mb-1">Support</p>
         {HELP_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -102,9 +87,7 @@ export default function Sidebar({ open, onClose }) {
               }`
             }
           >
-            <span className="material-symbols-outlined text-[20px]">
-              {item.icon}
-            </span>
+            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
             <span>{item.label}</span>
           </NavLink>
         ))}
@@ -120,12 +103,8 @@ export default function Sidebar({ open, onClose }) {
             {user?.username?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#1F2933] truncate">
-              {user?.username || "User"}
-            </p>
-            <p className="text-[11px] text-[#9AA5B1] truncate">
-              {user?.email || ""}
-            </p>
+            <p className="text-sm font-semibold text-[#1F2933] truncate">{user?.username || "User"}</p>
+            <p className="text-[11px] text-[#9AA5B1] truncate">{user?.email || ""}</p>
           </div>
         </div>
         <button
@@ -149,10 +128,7 @@ export default function Sidebar({ open, onClose }) {
       {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-            onClick={onClose}
-          />
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose} />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white border-r border-[#E4EEF3] shadow-2xl animate-[slideIn_0.25s_ease]">
             <SidebarContent />
           </aside>

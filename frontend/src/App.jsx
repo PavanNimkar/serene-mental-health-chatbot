@@ -9,11 +9,12 @@ import Dashboard from "./pages/Dashboard";
 import Mood from "./pages/Mood";
 import Tests from "./pages/Tests";
 import Profile from "./pages/Profile";
+import Journal from "./pages/Journal";
+import Goals from "./pages/Goals";
 import Helplines from "./pages/FindHelp/Helplines";
 import FindTherapist from "./pages/FindHelp/FindTherapist";
 import SelfHelpTechniques from "./pages/FindHelp/SelfHelpTechniques";
 
-/** Redirect unauthenticated users to /login */
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
@@ -21,9 +22,7 @@ function ProtectedRoute({ children }) {
       <div className="min-h-screen flex items-center justify-center bg-[#f9f9ff]">
         <div className="flex flex-col items-center gap-3">
           <img src="/logo.png" alt="serene" className="w-12 animate-pulse" />
-          <p className="text-sm text-[#787586] font-mono tracking-widest">
-            Loading…
-          </p>
+          <p className="text-sm text-[#787586] font-mono tracking-widest">Loading…</p>
         </div>
       </div>
     );
@@ -31,7 +30,6 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-/** Redirect already-logged-in users away from login */
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -52,61 +50,20 @@ function AppRoutes() {
         }
       />
 
-      {/* Protected App Pages */}
-      <Route
-        path="/chat"
-        element={
-          <ProtectedRoute>
-            <Chat />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/mood"
-        element={
-          <ProtectedRoute>
-            <Mood />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tests"
-        element={
-          <ProtectedRoute>
-            <Tests />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
+      {/* Protected */}
+      <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/mood" element={<ProtectedRoute><Mood /></ProtectedRoute>} />
+      <Route path="/tests" element={<ProtectedRoute><Tests /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
+      <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
 
-      {/* Find Help — accessible without auth */}
-      <Route
-        path="/find-help/helplines"
-        element={
-          <ProtectedRoute>
-            <Helplines />
-          </ProtectedRoute>
-        }
-      />
+      {/* Find Help */}
+      <Route path="/find-help/helplines" element={<ProtectedRoute><Helplines /></ProtectedRoute>} />
       <Route path="/find-help/therapist" element={<FindTherapist />} />
       <Route path="/find-help/self-help" element={<SelfHelpTechniques />} />
 
-      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

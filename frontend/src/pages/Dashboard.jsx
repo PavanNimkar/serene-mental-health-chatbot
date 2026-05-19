@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { dashboard, mood } from "../services/api";
+import { dashboard, mood, journal, goals } from "../services/api";
 import AppLayout from "../components/AppLayout";
 import GlassCard from "../components/GlassCard";
 import {
@@ -21,38 +21,19 @@ function getGreeting() {
   return "Good evening";
 }
 
-function StatCard({
-  icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-  badge,
-  badgeColor,
-}) {
+function StatCard({ icon, iconBg, iconColor, label, value, badge, badgeColor }) {
   return (
     <GlassCard className="p-5 hover:scale-[1.02] transition-transform duration-200">
       <div className="flex items-center justify-between mb-3">
         <span className={`p-2 rounded-xl ${iconBg}`}>
-          <span
-            className={`material-symbols-outlined text-[20px] ${iconColor}`}
-          >
-            {icon}
-          </span>
+          <span className={`material-symbols-outlined text-[20px] ${iconColor}`}>{icon}</span>
         </span>
         {badge && (
-          <span
-            className={`text-xs font-mono ${badgeColor || "text-[#9AA5B1]"}`}
-          >
-            {badge}
-          </span>
+          <span className={`text-xs font-mono ${badgeColor || "text-[#9AA5B1]"}`}>{badge}</span>
         )}
       </div>
       <p className="text-xs text-[#9AA5B1] mb-0.5">{label}</p>
-      <h3
-        className="text-2xl font-bold text-[#1F2933]"
-        style={{ fontFamily: "serif" }}
-      >
+      <h3 className="text-2xl font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
         {value}
       </h3>
     </GlassCard>
@@ -64,26 +45,183 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div className="bg-white border border-[#E4EEF3] shadow-lg px-3 py-2 rounded-xl text-xs">
         <p className="text-[#9AA5B1]">{label}</p>
-        <p className="font-mono font-bold text-[#22B1D4]">
-          Score: {payload[0].value}
-        </p>
+        <p className="font-mono font-bold text-[#22B1D4]">Score: {payload[0].value}</p>
       </div>
     );
   }
   return null;
 };
 
+// ── Journal preview widget ──────────────────────────────────────────────────
+function JournalWidget({ entries, stats }) {
+  return (
+    <GlassCard className="p-5">
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="text-base font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+          Journal
+        </h4>
+        <Link to="/journal" className="text-[#22B1D4] text-xs font-mono hover:underline">
+          Open →
+        </Link>
+      </div>
+
+      {/* Mini stats */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="p-2 rounded-xl bg-[#E8F8FC] text-center">
+          <p className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+            {stats?.total_entries ?? 0}
+          </p>
+          <p className="text-[10px] text-[#9AA5B1]">Entries</p>
+        </div>
+        <div className="p-2 rounded-xl bg-emerald-50 text-center">
+          <p className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+            {stats?.streak_days ?? 0}
+          </p>
+          <p className="text-[10px] text-[#9AA5B1]">Streak</p>
+        </div>
+        <div className="p-2 rounded-xl bg-violet-50 text-center">
+          <p className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+            {stats?.entries_this_week ?? 0}
+          </p>
+          <p className="text-[10px] text-[#9AA5B1]">This Week</p>
+        </div>
+      </div>
+
+      {/* Recent entries */}
+      {entries.length === 0 ? (
+        <div className="text-center py-4 text-[#9AA5B1] text-sm">
+          <span className="material-symbols-outlined text-2xl mb-1 block">menu_book</span>
+          Start your first journal entry
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {entries.slice(0, 3).map((e) => (
+            <Link
+              key={e.id}
+              to="/journal"
+              className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors border border-transparent hover:border-[#D4EEF7]"
+            >
+              <span className="material-symbols-outlined text-[16px] text-[#22B1D4] mt-0.5 shrink-0">edit_note</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-[#1F2933] truncate">
+                  {e.title || "Untitled Entry"}
+                </p>
+                <p className="text-[11px] text-[#9AA5B1] truncate">{e.content}</p>
+              </div>
+              <span className="text-[10px] text-[#9AA5B1] font-mono shrink-0">
+                {new Date(e.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <Link
+        to="/journal"
+        className="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-xs font-semibold hover:opacity-90 transition shadow-[0_4px_12px_rgba(34,177,212,.25)]"
+        style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
+      >
+        <span className="material-symbols-outlined text-[16px]">edit</span>
+        Write Today
+      </Link>
+    </GlassCard>
+  );
+}
+
+// ── Goals preview widget ───────────────────────────────────────────────────
+function GoalsWidget({ items }) {
+  const active = items.filter((g) => g.status === "active");
+  const completed = items.filter((g) => g.status === "completed").length;
+
+  return (
+    <GlassCard className="p-5">
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="text-base font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+          Goals
+        </h4>
+        <Link to="/goals" className="text-[#22B1D4] text-xs font-mono hover:underline">
+          View All →
+        </Link>
+      </div>
+
+      {/* Mini stats */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="p-2 rounded-xl bg-[#E8F8FC] text-center">
+          <p className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+            {active.length}
+          </p>
+          <p className="text-[10px] text-[#9AA5B1]">Active</p>
+        </div>
+        <div className="p-2 rounded-xl bg-emerald-50 text-center">
+          <p className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
+            {completed}
+          </p>
+          <p className="text-[10px] text-[#9AA5B1]">Completed</p>
+        </div>
+      </div>
+
+      {active.length === 0 ? (
+        <div className="text-center py-4 text-[#9AA5B1] text-sm">
+          <span className="material-symbols-outlined text-2xl mb-1 block">flag</span>
+          Set your first goal
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {active.slice(0, 3).map((g) => (
+            <Link key={g.id} to="/goals" className="block">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-semibold text-[#1F2933] truncate flex-1 mr-2">{g.title}</p>
+                <span className="text-[10px] font-mono text-[#9AA5B1] shrink-0">{g.progress_pct}%</span>
+              </div>
+              <div className="h-1.5 bg-[#E4EEF3] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${g.progress_pct}%`,
+                    background: "linear-gradient(90deg,#22B1D4,#189AB4)",
+                  }}
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <Link
+        to="/goals"
+        className="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-[#22B1D4] text-xs font-semibold hover:bg-[#E8F8FC] transition border border-[#D4EEF7]"
+      >
+        <span className="material-symbols-outlined text-[16px]">add</span>
+        New Goal
+      </Link>
+    </GlassCard>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [moodGraph, setMoodGraph] = useState([]);
+  const [journalEntries, setJournalEntries] = useState([]);
+  const [journalStats, setJournalStats] = useState(null);
+  const [goalItems, setGoalItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([dashboard.get(), mood.graph(7)])
-      .then(([d, g]) => {
+    Promise.all([
+      dashboard.get(),
+      mood.graph(7),
+      journal.list().catch(() => []),
+      journal.stats().catch(() => null),
+      goals.list({ status: "active" }).catch(() => []),
+    ])
+      .then(([d, g, jEntries, jStats, gItems]) => {
         setData(d);
         setMoodGraph(g?.data || g || []);
+        setJournalEntries(Array.isArray(jEntries) ? jEntries : jEntries?.results || []);
+        setJournalStats(jStats);
+        setGoalItems(Array.isArray(gItems) ? gItems : gItems?.results || []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -103,9 +241,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
             <img src="/logo.png" alt="Serene" className="w-10 animate-pulse" />
-            <p className="text-xs text-[#9AA5B1] font-mono">
-              Loading your sanctuary…
-            </p>
+            <p className="text-xs text-[#9AA5B1] font-mono">Loading your sanctuary…</p>
           </div>
         </div>
       ) : (
@@ -146,29 +282,21 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Middle: Conversations + Mood Chart */}
+          {/* Middle row: Conversations + Mood chart */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Recent Conversations */}
             <GlassCard className="lg:col-span-5 p-6">
               <div className="flex justify-between items-center mb-5">
-                <h4
-                  className="text-lg font-bold text-[#1F2933]"
-                  style={{ fontFamily: "serif" }}
-                >
+                <h4 className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
                   Recent Sessions
                 </h4>
-                <Link
-                  to="/chat"
-                  className="text-[#22B1D4] text-xs font-mono hover:underline"
-                >
+                <Link to="/chat" className="text-[#22B1D4] text-xs font-mono hover:underline">
                   New Chat →
                 </Link>
               </div>
               {conversations.length === 0 ? (
                 <div className="text-center py-8 text-[#9AA5B1] text-sm">
-                  <span className="material-symbols-outlined text-3xl mb-2 block">
-                    chat_bubble_outline
-                  </span>
+                  <span className="material-symbols-outlined text-3xl mb-2 block">chat_bubble_outline</span>
                   No conversations yet. Start chatting!
                 </div>
               ) : (
@@ -193,9 +321,7 @@ export default function Dashboard() {
                             {c.title || `Session ${c.id}`}
                           </span>
                           <span className="text-[10px] text-[#9AA5B1] font-mono shrink-0 ml-2">
-                            {new Date(
-                              c.updated_at || c.created_at,
-                            ).toLocaleDateString()}
+                            {new Date(c.updated_at || c.created_at).toLocaleDateString()}
                           </span>
                         </div>
                         <p className="text-xs text-[#9AA5B1] truncate mt-0.5">
@@ -209,13 +335,9 @@ export default function Dashboard() {
               <Link
                 to="/chat"
                 className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-colors shadow-[0_4px_12px_rgba(34,177,212,.3)]"
-                style={{
-                  background: "linear-gradient(135deg,#22B1D4,#189AB4)",
-                }}
+                style={{ background: "linear-gradient(135deg,#22B1D4,#189AB4)" }}
               >
-                <span className="material-symbols-outlined text-[18px]">
-                  add
-                </span>
+                <span className="material-symbols-outlined text-[18px]">add</span>
                 New Conversation
               </Link>
             </GlassCard>
@@ -224,66 +346,35 @@ export default function Dashboard() {
             <GlassCard className="lg:col-span-7 p-6 flex flex-col">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4
-                    className="text-lg font-bold text-[#1F2933]"
-                    style={{ fontFamily: "serif" }}
-                  >
+                  <h4 className="text-lg font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
                     Mood This Week
                   </h4>
-                  <p className="text-xs text-[#9AA5B1] mt-0.5">
-                    Your emotional landscape over 7 days
-                  </p>
+                  <p className="text-xs text-[#9AA5B1] mt-0.5">Your emotional landscape over 7 days</p>
                 </div>
-                <Link
-                  to="/mood"
-                  className="text-[#22B1D4] text-xs font-mono hover:underline"
-                >
+                <Link to="/mood" className="text-[#22B1D4] text-xs font-mono hover:underline">
                   Log Today →
                 </Link>
               </div>
               {moodGraph.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-center text-[#9AA5B1] text-sm py-8">
                   <div>
-                    <span className="material-symbols-outlined text-3xl mb-2 block">
-                      show_chart
-                    </span>
+                    <span className="material-symbols-outlined text-3xl mb-2 block">show_chart</span>
                     Start logging moods to see your chart
                   </div>
                 </div>
               ) : (
                 <div className="flex-1 min-h-[160px]">
                   <ResponsiveContainer width="100%" height={180}>
-                    <AreaChart
-                      data={moodGraph}
-                      margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-                    >
+                    <AreaChart data={moodGraph} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                       <defs>
-                        <linearGradient
-                          id="moodGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#22B1D4"
-                            stopOpacity={0.2}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#22B1D4"
-                            stopOpacity={0}
-                          />
+                        <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22B1D4" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#22B1D4" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <XAxis
                         dataKey="date"
-                        tick={{
-                          fontSize: 10,
-                          fill: "#9AA5B1",
-                          fontFamily: "JetBrains Mono",
-                        }}
+                        tick={{ fontSize: 10, fill: "#9AA5B1", fontFamily: "JetBrains Mono" }}
                         tickLine={false}
                         axisLine={false}
                       />
@@ -305,42 +396,36 @@ export default function Dashboard() {
             </GlassCard>
           </div>
 
+          {/* Journal + Goals row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <JournalWidget entries={journalEntries} stats={journalStats} />
+            <GoalsWidget items={goalItems} />
+          </div>
+
           {/* Bottom: Tests + Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* PHQ-9 */}
             <GlassCard className="p-5">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h5 className="font-semibold text-[#1F2933] text-sm">
-                    PHQ-9 Depression
-                  </h5>
+                  <h5 className="font-semibold text-[#1F2933] text-sm">PHQ-9 Depression</h5>
                   <p className="text-xs text-[#9AA5B1]">Latest result</p>
                 </div>
                 <span className="p-1.5 rounded-lg bg-[#E8F8FC] border border-[#D4EEF7]">
-                  <span className="material-symbols-outlined text-[#22B1D4] text-[18px]">
-                    psychology
-                  </span>
+                  <span className="material-symbols-outlined text-[#22B1D4] text-[18px]">psychology</span>
                 </span>
               </div>
               {latestTests["PHQ-9"] ? (
                 <div>
-                  <p
-                    className="text-2xl font-bold text-[#1F2933]"
-                    style={{ fontFamily: "serif" }}
-                  >
+                  <p className="text-2xl font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
                     {latestTests["PHQ-9"].total_score}
                   </p>
-                  <p className="text-xs text-[#9AA5B1] mt-1">
-                    {latestTests["PHQ-9"].interpretation}
-                  </p>
+                  <p className="text-xs text-[#9AA5B1] mt-1">{latestTests["PHQ-9"].interpretation}</p>
                 </div>
               ) : (
                 <p className="text-sm text-[#9AA5B1]">Not taken yet</p>
               )}
-              <Link
-                to="/tests"
-                className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono"
-              >
+              <Link to="/tests" className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono">
                 Take assessment →
               </Link>
             </GlassCard>
@@ -349,76 +434,59 @@ export default function Dashboard() {
             <GlassCard className="p-5">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h5 className="font-semibold text-[#1F2933] text-sm">
-                    GAD-7 Anxiety
-                  </h5>
+                  <h5 className="font-semibold text-[#1F2933] text-sm">GAD-7 Anxiety</h5>
                   <p className="text-xs text-[#9AA5B1]">Latest result</p>
                 </div>
                 <span className="p-1.5 rounded-lg bg-[#E8F8FC] border border-[#D4EEF7]">
-                  <span className="material-symbols-outlined text-[#189AB4] text-[18px]">
-                    monitor_heart
-                  </span>
+                  <span className="material-symbols-outlined text-[#189AB4] text-[18px]">monitor_heart</span>
                 </span>
               </div>
               {latestTests["GAD-7"] ? (
                 <div>
-                  <p
-                    className="text-2xl font-bold text-[#1F2933]"
-                    style={{ fontFamily: "serif" }}
-                  >
+                  <p className="text-2xl font-bold text-[#1F2933]" style={{ fontFamily: "serif" }}>
                     {latestTests["GAD-7"].total_score}
                   </p>
-                  <p className="text-xs text-[#9AA5B1] mt-1">
-                    {latestTests["GAD-7"].interpretation}
-                  </p>
+                  <p className="text-xs text-[#9AA5B1] mt-1">{latestTests["GAD-7"].interpretation}</p>
                 </div>
               ) : (
                 <p className="text-sm text-[#9AA5B1]">Not taken yet</p>
               )}
-              <Link
-                to="/tests"
-                className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono"
-              >
+              <Link to="/tests" className="mt-3 flex items-center gap-1 text-xs text-[#22B1D4] hover:underline font-mono">
                 Take assessment →
               </Link>
             </GlassCard>
 
             {/* Quick Actions */}
             <GlassCard className="p-5">
-              <h5 className="font-semibold text-[#1F2933] text-sm mb-3">
-                Quick Actions
-              </h5>
+              <h5 className="font-semibold text-[#1F2933] text-sm mb-3">Quick Actions</h5>
               <div className="space-y-2">
-                <Link
-                  to="/mood"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D] group"
-                >
+                <Link to="/mood" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]">
                   <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
-                    <span className="material-symbols-outlined text-[16px]">
-                      wb_sunny
-                    </span>
+                    <span className="material-symbols-outlined text-[16px]">wb_sunny</span>
                   </span>
                   Log today's mood
                 </Link>
-                <Link
-                  to="/chat"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]"
-                >
+                <Link to="/journal" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]">
                   <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
-                    <span className="material-symbols-outlined text-[16px]">
-                      forum
-                    </span>
+                    <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                  </span>
+                  Write in journal
+                </Link>
+                <Link to="/goals" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]">
+                  <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
+                    <span className="material-symbols-outlined text-[16px]">flag</span>
+                  </span>
+                  Track a goal
+                </Link>
+                <Link to="/chat" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#E8F8FC] transition-colors text-sm text-[#52606D]">
+                  <span className="p-1.5 rounded-lg bg-[#E8F8FC] text-[#22B1D4] border border-[#D4EEF7]">
+                    <span className="material-symbols-outlined text-[16px]">forum</span>
                   </span>
                   Start a session
                 </Link>
-                <Link
-                  to="/find-help/helplines"
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm text-[#52606D]"
-                >
+                <Link to="/find-help/helplines" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm text-[#52606D]">
                   <span className="p-1.5 rounded-lg bg-red-50 text-red-500 border border-red-100">
-                    <span className="material-symbols-outlined text-[16px]">
-                      emergency
-                    </span>
+                    <span className="material-symbols-outlined text-[16px]">emergency</span>
                   </span>
                   Crisis helplines
                 </Link>
